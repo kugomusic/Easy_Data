@@ -1,0 +1,149 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<title>Easy Data</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}" />
+	<link rel="shortcut icon" href="{{url_for('static',filename='images/logo.png')}}" />
+
+</head>
+
+<body class="landing">
+
+	<!-- Page Wrapper -->
+	<div id="page-wrapper">
+
+		<!-- Header -->
+		<header id="header" class="alt">
+			<h1><a href="{{url_for("index")}}">Easy Data</a></h1>
+			<nav id="nav">
+				<ul>
+					<li class="special">
+						<a href="#" class="menuToggle"><span>Menu</span></a>
+						<div id="menu">
+							<ul>
+								<li><a href="{{url_for("index")}}">ED主页</a></li>
+								<li><a href="#model">功能模块介绍</a></li>
+								<li><a href="{{url_for("login")}}">登陆ED</a></li>
+							</ul>
+						</div>
+					</li>
+				</ul>
+			</nav>
+		</header>
+
+		<!-- Banner -->
+		<section id="banner">
+			<div class="inner">
+				<h2>Easy Data</h2>
+				<p>一个很简单的数据分析平台</p>
+				<ul class="actions">
+					<li><a href="{{url_for('mission_post')}}" class="button special">开始一次数据分析</a></li>
+				</ul>
+			</div>
+			<a href="#info" class="more scrolly">了解更多</a>
+		</section>
+
+		<!-- One -->
+		<section id="info" class="wrapper style1 special">
+			<div class="inner">
+				<header class="major">
+					<h2>什么是ED</h2>
+					<p style="text-align:center">ED(Easy Data)是一个大数据可视化平台，以项目的形式组织数据进行分析及可视化<br>它包含一些机器学习的功能，虽然现在还没有开发。</p>
+				</header>
+				<ul class="icons major">
+					<li><span class="icon fa-code major style3"><span class="label">Dolor</span></span></li>
+				</ul>
+			</div>
+		</section>
+
+		<!-- Two -->
+		<section id="style" class="wrapper alt style2">
+			<section class="spotlight">
+				<div class="image"><img src="images/pic02.jpg" alt="" /></div>
+				<div class="content">
+					<h2>简易</h2>
+					<!--这里没写url，先用百度代替吧-->
+					<p>阅读<a href="{{'http://www.baidu.com'}}">快速开始</a>,ED真的非常好用。</p>
+				</div>
+			</section>
+		</section>
+
+		<!-- Three -->
+		<section id="model" class="wrapper style3 special">
+			<div class="inner">
+				<header class="major">
+					<h2>你可以使用ED来干什么</h2>
+				</header>
+				<ul class="features">
+					<li class="icon fa-code">
+						<h3>数据探索</h3>
+						<p>主要完成数据的基本统计并可视化，把握数据的基本信息，方便进行进一步数据处理，数据分析，训练模型并预测。</p>
+						<!--这里还没有url，先用百度代替吧-->
+						<p><a href="{{'http://www.baidu.com'}}">了解更多</a></p>
+					</li>
+				</ul>
+				<ul class="features">
+					<li class="icon fa-code">
+						<h3>数据处理</h3>
+						<p>在当前数据视图，对选定的列做数据处理原子操作，在数据流程视图页显示数据处理流程图，并能一键重新运行。</p>
+						<!--这里还没有url，先用百度代替吧-->
+						<p><a href="{{'http://www.baidu.com'}}">了解更多</a></p>
+					</li>
+				</ul>
+				<ul class="features">
+					<li class="icon fa-code">
+						<h3>数据分析</h3>
+						<p>在当前数据视图，对选定的列做数据处理原子操作，在数据流程视图页显示数据处理流程图，并能一键重新运行。</p>
+						<!--这里还没有url，先用百度代替吧-->
+						<p><a href="{{'http://www.baidu.com'}}">了解更多</a></p>
+					</li>
+				</ul>
+				<ul class="features">
+					<li class="icon fa-code">
+						<h3>模型</h3>
+						<p>周康学长并没有写这部分的描述。</p>
+						<!--这里还没有url，先用百度代替吧-->
+						<p><a href="{{'http://www.baidu.com'}}">了解更多</a></p>
+					</li>
+				</ul>
+			</div>
+		</section>
+
+		<!-- CTA -->
+		<section id="rule" class="wrapper style4">
+			<div class="inner">
+				<header>
+					<h2>for better ED</h2>
+					<br />
+					<p>ED刚刚开始开发。<br />希望大家可以坚持下去把它做好~</p>
+				</header>
+			</div>
+		</section>
+
+		<!-- Footer -->
+		<footer id="footer">
+			<ul class="icons">
+				<li><a href="https://github.com/kugomusic/Easy_Data" class="icon fa-github"><span class="label">Github</span></a></li>
+				<li><a href="mailto:343192497@qq.com" class="icon fa-envelope"><span class="label">Email</span></a></li>
+			</ul>
+			<ul class="copyright">
+				<li>&copy; Easy Data</li>
+			</ul>
+		</footer>
+
+	</div>
+
+	<!-- Scripts -->
+	<script src="{{url_for('static',filename='js/jquery.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/jquery.scrollex.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/jquery.scrolly.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/skel.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/init.js')}}"></script>
+
+
+</body>
+
+</html>

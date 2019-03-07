@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<title>Easy Data</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	<link rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}" />
+	<link rel="shortcut icon" href="{{url_for('static',filename='images/logo.png')}}" />
+	{% with messages = get_flashed_messages() %}
+	{% if messages %}
+	{% for message in messages %}
+	<script type="text/javascript">
+		alert('{{message}}')
+	</script>
+	{% endfor %}
+	{% endif %}
+	{% endwith %}
+</head>
+
+<body>
+
+	<!-- Page Wrapper -->
+	<div id="page-wrapper">
+
+		{% block main_body %}{% endblock %}
+		<!-- Footer -->
+		<footer id="footer">
+			<ul class="icons">
+				<li><a href="https://github.com/kugomusic/Easy_Data" class="icon fa-github"><span class="label">Github</span></a></li>
+				<li><a href="mailto:343192497@qq.com" class="icon fa-envelope"><span class="label">Email</span></a></li>
+			</ul>
+			<ul class="copyright">
+				<li>&copy; Easy Data</li>
+			</ul>
+		</footer>
+
+	</div>
+
+	<!-- Scripts -->
+	<script src="{{url_for('static',filename='js/jquery.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/jquery.scrollex.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/jquery.scrolly.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/skel.min.js')}}"></script>
+	<script src="{{url_for('static',filename='js/init.js')}}"></script>
+
+</body>
+
+</html>
