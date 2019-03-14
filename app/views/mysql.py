@@ -12,7 +12,7 @@ import shutil
 import json
 import pandas as pd
 import os
-from app.utils import mkdir
+from app.utils import mkdir, getProjectCurrentDataUrl
 
 
 #解决 list, dict 不能返回的问题
@@ -49,20 +49,22 @@ def creatProject():
         dataSourceId = request.form.get('dataSourceId')
         userId = request.form.get('userId')
     print('projectName: {}, dataSourceId: {}, userId: {}'.format(projectName, dataSourceId,userId))
-    project = Project(project_name=projectName,project_address='/Users/kang/PycharmProjects/project/'+projectName,user_id = userId, dataSource_id = dataSourceId)
+    rootUrl = '/home/zk/project/'
+    # rootUrl = rootUrl
+    project = Project(project_name=projectName,project_address=rootUrl+projectName,user_id = userId, dataSource_id = dataSourceId)
     db.session.add(project)
 
     try:
-        if(not (os.path.exists('/Users/kang/PycharmProjects/project/'+projectName))):
+        if(not (os.path.exists(rootUrl+projectName))):
             filters = {
                 DataSource.id ==dataSourceId
             }
             DSs = DataSource.query.filter(*filters).first()
             db.session.commit()
-            mkdir('/Users/kang/PycharmProjects/project/'+projectName)
+            mkdir(rootUrl+projectName)
             print(DSs.file_url)
-            print(u'/Users/kang/PycharmProjects/project/'+projectName)
-            shutil.copyfile(DSs.file_url, u'/Users/kang/PycharmProjects/project/'+projectName+'/'+DSs.file_name+'.csv')
+            print(rootUrl+projectName)
+            shutil.copyfile(DSs.file_url, rootUrl+projectName+'/'+DSs.file_name+'.csv')
             return getProjectList()
         else:
             return "Double name"
@@ -132,26 +134,16 @@ def currentDataPreview():
         start = request.form.get('start')
         end = request.form.get('end')
         projectName = request.form.get('projectName')
-    print('start: {}, end: {}, projectId: {}'.format(start, end, projectName))
+    print('start: {}, end: {}, projectName: {}'.format(start, end, projectName))
     try:
-        filters = {
-            Project.project_name == projectName
-        }
-        Pro = Project.query.filter(*filters).first()
-        ProjectAddress = Pro.project_address
-        filename =''
-        for root, dirs, files in os.walk(ProjectAddress):
-            # print(root) #当前目录路径
-            # print(dirs) #当前路径下所有子目录
-            # print(files) #当前路径下所有非目录子文件
-            for file in files:
-                filename = file
-                break
-            break
+        urls = getProjectCurrentDataUrl(projectName)
+        # print(urls)
+        fileUrl = urls['fileUrl']
+        # print(fileUrl)
     except:
         return "error"
     try:
-        data = pd.read_csv(ProjectAddress+'/'+filename, encoding='utf-8')
+        data = pd.read_csv(fileUrl, encoding='utf-8')
         data2 = data[int(start):int(end)].to_json(orient='records', force_ascii=False)
         return jsonify({'length': len(data), 'data': json.loads(data2)})
     except:

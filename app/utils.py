@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 from app.models.mysql import DataSource, Project,initdb
-
+import os
 # 获取项目的正在操作的数据文件地址
 def getProjectCurrentDataUrl(projectName):
     try:
@@ -9,6 +9,7 @@ def getProjectCurrentDataUrl(projectName):
         }
         Pro = Project.query.filter(*filters).first()
         ProjectAddress = Pro.project_address
+        # print(ProjectAddress)
         filename = ''
         for root, dirs, files in os.walk(ProjectAddress):
             # print(root) #当前目录路径
@@ -19,10 +20,11 @@ def getProjectCurrentDataUrl(projectName):
                     filename = file
                     break
             break
+        # print(filename)
         if filename == '':
             return "error"
         else:
-            return {'fileUrl' : ProjectAddress+'/'+filename , 'projectAddress' : ProjectAddress}
+            return {'fileUrl': ProjectAddress+'/'+filename, 'projectAddress': ProjectAddress}
     except:
         return "error"
 

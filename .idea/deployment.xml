@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="slave2" createEmptyFolders="true">
+    <serverData>
+      <paths name="slave2">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Easy_Data" local="$PROJECT_DIR$" web="/Easy_Data" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

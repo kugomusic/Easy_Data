@@ -1,20 +1,21 @@
+# -*- coding: UTF-8 -*-
 from app import db
 from app import app
 import click
 
-# ´´½¨Êı¾İ¿â
+# åˆ›å»ºæ•°æ®åº“
 # @app.cli.command()
 def initdb():
     db.create_all()
     click.echo('Initialized database.')
 
-# É¾³ıÊı¾İ¿â
+# åˆ é™¤æ•°æ®åº“
 # @app.cli.command()
 def dropdb():
     db.drop_all()
     click.echo('Drop database.')
 
-# Êı¾İÔ´Àà
+# æ•°æ®æºç±»
 class DataSource(db.Model):
     __tablename__ = 'data_source'
     id = db.Column(db.Integer, primary_key=True)
@@ -23,14 +24,14 @@ class DataSource(db.Model):
     file_type = db.Column(db.String(64))
 
 
-# ÓÃ»§Àà
+# ç”¨æˆ·ç±»
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     user_name = db.Column(db.String(64), unique=True, index=True)
     password = db.Column(db.String(128))
 
-# ÏîÄ¿Àà
+# é¡¹ç›®ç±»
 class Project(db.Model):
     __tablename__ = 'project'
     id = db.Column(db.Integer, primary_key=True)
