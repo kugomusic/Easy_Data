@@ -93,35 +93,16 @@ def rawDataPreview():
         projectName = request.form.get('projectName')
     print('start: {}, end: {}, projectName: {}'.format(start, end, projectName))
     try:
-        filters = {
-            Project.project_name == projectName
-        }
-        Pro = Project.query.filter(*filters).first()
-        DataSourceId = Pro.dataSource_id
-        filters = {
-            DataSource.id == DataSourceId
-        }
-        Ds = DataSource.query.filter(*filters).first()
-        fileUrl = Ds.file_url
-
+        urls = getProjectCurrentDataUrl(projectName)
+        fileUrl = urls['fileUrl']
     except:
         return "error"
-    import csv
-    # with open(fileUrl, 'r') as csvfile:
-    #     reader = csv.reader(csvfile)
-    #     rows = [row.decode("utf8") for row in reader]
-    data = pd.read_csv(fileUrl,encoding='utf-8')
-    # print(data.head())
-    data2 = data[int(start):int(end)].to_json(orient='records',force_ascii=False)
-    # print(data2)
-    # result = []
-    # for i in rows[int(start):int(end)]:
-    #     info = {}.fromkeys(rows[0])
-    #     for j in range(len(rows[0])):
-    #         info[rows[0][j]] = i[j]
-    #     result.append(info)
-    # # print(rows)  # 输出所有数据
-    return jsonify({'length':len(data), 'data':json.loads(data2)})
+    try:
+        data = pd.read_csv(fileUrl, encoding='utf-8')
+        data2 = data[int(start):int(end)].to_json(orient='records', force_ascii=False)
+        return jsonify({'length': len(data), 'data': json.loads(data2)})
+    except:
+        return "error read"
 
 #当前数据预览
 @app.route('/currentDataPreview', methods=['GET','POST'])

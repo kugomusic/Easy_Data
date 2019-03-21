@@ -54,3 +54,13 @@ def mkdir(path):
         # 如果目录存在则不创建，并提示目录已存在
         print(path+' 目录已存在')
         return False
+
+def deldir(path):
+    import os
+    if os.path.exists(path):
+        #删除文件，可使用以下两种方法。
+        os.remove(path)
+        return True
+    else:
+        print('no such file:%s' % path)
+        return False
