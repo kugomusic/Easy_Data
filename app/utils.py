@@ -1,6 +1,53 @@
 # -*- coding: UTF-8 -*-
-from app.models.mysql import DataSource, Project,initdb
-import os
+from app.models.mysql import DataSource, Project, initdb, ProcessFlow
+import os, json
+from app import db
+
+# 获取处理流
+def getProcessFlowByProjectId(projectId):
+    try:
+        filters = {
+            ProcessFlow.project_id == projectId,
+        }
+        return ProcessFlow.query.filter(*filters).first()
+    except:
+        return "error"
+
+# 追加处理流程记录
+def addProcessingFlow(projectName, userId, operate):
+    try:
+        print(projectName, ' ', userId, ' ', operate)
+        pflow = db.session.query(ProcessFlow.id,ProcessFlow.project_id,ProcessFlow.operates). \
+            join(Project, Project.id == ProcessFlow.project_id). \
+            filter(Project.project_name == projectName). \
+            filter(Project.user_id == userId).\
+            first()
+        # print(pflow)
+        operates = json.loads(pflow[2])
+        operates.append(operate)
+        # print('operates=', operates)
+        operateStr = json.dumps(operates, ensure_ascii=False)
+        # print('operateStr=', operateStr)
+        filters = {
+            ProcessFlow.id == pflow[0],
+        }
+        result = ProcessFlow.query.filter(*filters).first()
+        result.operates = operateStr
+        db.session.commit()
+    except:
+        return "error"
+# addProcessingFlow('甜点销售数据预处理',1,{'type':'1','operate':'列名一,关系,值,组合关系;列名一,关系,值,'})
+
+# 获取项目
+def getProjectByNameAndUserId(projectName,userId):
+    try:
+        print('projectName=',projectName,' userId=',userId)
+        return db.session.query(Project).filter(Project.project_name == projectName) \
+            .filter(Project.user_id == userId)\
+            .first()
+    except:
+        return "error"
+
 # 获取项目的正在操作的数据文件地址
 def getProjectCurrentDataUrl(projectName):
     try:
@@ -64,3 +111,19 @@ def deldir(path):
     else:
         print('no such file:%s' % path)
         return False
+
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        pass
+
+    try:
+        import unicodedata
+        unicodedata.numeric(s)
+        return True
+    except (TypeError, ValueError):
+        pass
+    return False

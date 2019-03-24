@@ -11,4 +11,5 @@ db = SQLAlchemy(app)
 #
 from app.views import mysql
 from app.views import exploration
+from app.views import process, operateFlow
 from app import test

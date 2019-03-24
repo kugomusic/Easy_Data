@@ -7,12 +7,12 @@ from flask import flash, get_flashed_messages, redirect, render_template, reques
 from flask.json import jsonify
 from app import app
 from app import db
-from app.models.mysql import DataSource, Project,initdb
+from app.models.mysql import DataSource, Project, ProcessFlow, initdb
 import shutil
 import json
 import pandas as pd
 import os
-from app.utils import mkdir, getProjectCurrentDataUrl
+from app.utils import mkdir, getProjectCurrentDataUrl, getProjectByNameAndUserId
 
 
 #解决 list, dict 不能返回的问题
@@ -51,9 +51,14 @@ def creatProject():
     print('projectName: {}, dataSourceId: {}, userId: {}'.format(projectName, dataSourceId,userId))
     rootUrl = '/home/zk/project/'
     # rootUrl = rootUrl
+    # 数据库中添加Project记录
     project = Project(project_name=projectName,project_address=rootUrl+projectName,user_id = userId, dataSource_id = dataSourceId)
     db.session.add(project)
-
+    # 数据库中添加ProcessFlow记录
+    pro = getProjectByNameAndUserId(projectName, userId)
+    processs = ProcessFlow(project_id=pro.id, operates="[]")
+    db.session.add(processs)
+    db.session.commit()
     try:
         if(not (os.path.exists(rootUrl+projectName))):
             filters = {
