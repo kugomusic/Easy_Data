@@ -70,7 +70,8 @@ def getProjectCurrentDataUrl(projectName):
         if filename == '':
             return "error"
         else:
-            return {'fileUrl': ProjectAddress+'/'+filename, 'projectAddress': ProjectAddress}
+            # return {'fileUrl': ProjectAddress+'/'+filename, 'projectAddress': ProjectAddress}
+            return {'fileUrl': 'file://' + ProjectAddress+'/'+filename, 'projectAddress': ProjectAddress}
     except:
         return "error"
 

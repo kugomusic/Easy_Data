@@ -44,11 +44,11 @@ def filterMultiConditions():
     projectName = request.form.get('projectName')
     userId = request.form.get('userId')
     parameterStr = request.form.get('parameter')
-    spark = SparkSession \
-        .builder \
-        .master("local") \
-        .config("spark.some.config.option", "some-value") \
-        .getOrCreate()
+    # spark = SparkSession \
+    #     .builder \
+    #     .master("local") \
+    #     .config("spark.some.config.option", "some-value") \
+    #     .getOrCreate()
     #测试用例
     # parameter = {}
     # parameter['fileUrl'] = '/home/zk/data/订单信息.csv'
@@ -136,7 +136,8 @@ def sort():
 
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
-    df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
@@ -188,7 +189,8 @@ def columnSplit():
 
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
-    df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
@@ -265,7 +267,8 @@ def rowSplit():
 
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
-    df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
@@ -320,7 +323,8 @@ def columnsMerge():
 
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
-    df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
@@ -375,7 +379,8 @@ def replace():
 
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
-    df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
+    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
