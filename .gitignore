@@ -1,0 +1,6 @@
+.idea/
+__pycache__/
+*.pyc
+.DS_STORE
+instance/
+.webassets-cache
