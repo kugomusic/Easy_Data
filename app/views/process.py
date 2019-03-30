@@ -13,20 +13,15 @@ from pyspark.sql.functions import split, explode, concat_ws, regexp_replace
 import random
 import string
 
+# csv文件存储目录（临时）
+# save_dir = "/home/zk/project/test.csv"
+save_dir = "/Users/tc/Desktop/可视化4.0/Project/test.csv"
+
+
 # 欢迎页面
 @app.route("/", methods=['GET', 'POST'])
 def hello():
     return "<h1 style='color:blueviolet'> HomePage of Easy_Data</h1>"
-
-
-# spark会话
-spark = SparkSession \
-    .builder \
-    .master("local") \
-    .config("spark.some.config.option", "some-value") \
-    .getOrCreate()
-
-sc = spark.sparkContext
 
 
 #解决 list, dict 不能返回的问题
@@ -44,11 +39,11 @@ def filterMultiConditions():
     projectName = request.form.get('projectName')
     userId = request.form.get('userId')
     parameterStr = request.form.get('parameter')
-    # spark = SparkSession \
-    #     .builder \
-    #     .master("local") \
-    #     .config("spark.some.config.option", "some-value") \
-    #     .getOrCreate()
+    spark = SparkSession \
+        .builder \
+        .master("local") \
+        .config("spark.some.config.option", "some-value") \
+        .getOrCreate()
     #测试用例
     # parameter = {}
     # parameter['fileUrl'] = '/home/zk/data/订单信息.csv'
@@ -137,7 +132,7 @@ def sort():
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
-    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
+    df_pandas.to_csv(save_dir, header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
@@ -149,6 +144,13 @@ def sortCore(requestStr):
     projectName = requestDict['project']
     columnName = requestDict['columnName']
     sortType = requestDict['sortType']
+
+    # spark会话
+    spark = SparkSession \
+        .builder \
+        .master("local") \
+        .config("spark.some.config.option", "some-value") \
+        .getOrCreate()
 
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
@@ -190,7 +192,7 @@ def columnSplit():
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
-    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
+    df_pandas.to_csv(save_dir, header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
@@ -203,6 +205,15 @@ def columnSplitCore(requestStr):
     projectName = requestDict['project']
     columnName = requestDict['columnName']
     newColumnNames = requestDict['newColumnNames']
+
+    # spark会话
+    spark = SparkSession \
+        .builder \
+        .master("local") \
+        .config("spark.some.config.option", "some-value") \
+        .getOrCreate()
+
+    sc = spark.sparkContext
 
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
@@ -268,7 +279,7 @@ def rowSplit():
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
-    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
+    df_pandas.to_csv(save_dir, header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
@@ -281,6 +292,13 @@ def rowSplitCore(requestStr):
     projectName = requestDict['project']
     columnName = requestDict['columnName']
     newColumnName = requestDict['newColumnName']
+
+    # spark会话
+    spark = SparkSession \
+        .builder \
+        .master("local") \
+        .config("spark.some.config.option", "some-value") \
+        .getOrCreate()
 
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
@@ -324,7 +342,7 @@ def columnsMerge():
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
-    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
+    df_pandas.to_csv(save_dir, header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
@@ -336,6 +354,14 @@ def columnsMergeCore(requestStr):
     projectName = requestDict['project']
     columnNames = requestDict['columnNames']
     newColumnName = requestDict['newColumnName']
+
+    # spark会话
+    spark = SparkSession \
+        .builder \
+        .master("local") \
+        .config("spark.some.config.option", "some-value") \
+        .getOrCreate()
+
     # 默认分隔符是","，若requestStr中指定了分隔符，则以用户指定为准
     try:
         splitSymbol = requestDict['splitSymbol']
@@ -356,6 +382,8 @@ def columnsMergeCore(requestStr):
         df = df.withColumn(newColumnName, concat_ws(splitSymbol, df[columnNames[0]], df[columnNames[1]], df[columnNames[2]]))
     elif len(columnNames) == 4:
         df = df.withColumn(newColumnName, concat_ws(splitSymbol, df[columnNames[0]], df[columnNames[1]], df[columnNames[2]], df[columnNames[3]]))
+
+    df.show()
 
     #追加处理流程记录
     operateParameter = {}
@@ -380,7 +408,7 @@ def replace():
     # 处理后的数据写入文件（借助pandas进行存储、返回）
     df_pandas = df.toPandas()
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
-    df_pandas.to_csv("/home/zk/project/test.csv", header=True)
+    df_pandas.to_csv(save_dir, header=True)
 
     return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
 
@@ -393,6 +421,13 @@ def replaceCore(requestStr):
     columnName = requestDict['columnName']
     sourceCharacter = requestDict['sourceCharacter']
     targetCharacter = requestDict['targetCharacter']
+
+    # spark会话
+    spark = SparkSession \
+        .builder \
+        .master("local") \
+        .config("spark.some.config.option", "some-value") \
+        .getOrCreate()
 
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
