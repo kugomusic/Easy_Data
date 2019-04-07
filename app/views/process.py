@@ -14,8 +14,9 @@ import random
 import string
 
 # csv文件存储目录（临时）
-# save_dir = "/home/zk/project/test.csv"
-save_dir = "/Users/tc/Desktop/可视化4.0/Project/test.csv"
+save_dir = "/home/zk/project/test.csv"
+# save_dir = "/Users/tc/Desktop/可视化4.0/Project/test.csv"
+# save_dir = '/Users/kang/PycharmProjects/project/test.csv'
 
 
 # 欢迎页面
@@ -58,13 +59,14 @@ def filterMultiConditions():
     fileUrl = parameter['fileUrl']
     condition = parameter['condition']
     df = spark.read.format("CSV").option("header", "true").load(fileUrl)
+    df.show()
     # 过滤函数
     sqlDF = filterCore(spark, df, condition)
     sqlDF.show()
     # 处理后的数据写入文件
     # sqlDF.write.csv(path='/home/zk/data/test.csv', header=True, sep=",", mode="overwrite")
     # sqlDF.coalesce(1).write.option("header", "true").csv("/home/zk/data/test.csv")
-    sqlDF.toPandas().to_csv("/home/zk/data/test.csv", header=True)
+    sqlDF.toPandas().to_csv(save_dir, header=True)
     #追加处理流程记录
     operateParameter = {}
     operateParameter['type'] = '1'
@@ -88,8 +90,8 @@ def filterCoreParameter(projectName, parameterStr):
     parameter = {}
     parameter['fileUrl'] = fileUrl
     condition = []
-    strList = parameterStr.split(';')
-    for i in range(len(strList)):
+    strList = parameterStr[0:len(parameterStr)-1].split(';')
+    for i in range(len(strList) - 1):
         ll = strList[i].split(',', 3)
         con ={}
         con['name'] = ll[0]
@@ -97,6 +99,13 @@ def filterCoreParameter(projectName, parameterStr):
         con['value'] = ll[2]
         con['relation'] = ll[3]
         condition.append(con)
+    ll = strList[len(strList) - 1].split(',', 2)
+    con = {}
+    con['name'] = ll[0]
+    con['operate'] = ll[1]
+    con['value'] = ll[2]
+    con['relation'] = ""
+    condition.append(con)
     parameter['condition'] = condition
     return parameter
 # print(filterCoreParameter('甜点销售数据预处理', '列名一,关系,值,组合关系;列名一,关系,值,'))
@@ -113,8 +122,10 @@ def filterCore(spark, df, condition):
             sqlStr = sqlStr + ' `' + i['name'] + '` ' + i['operate'] + ' ' + i['value'] + ' ' + i['relation']
         else:
             sqlStr = sqlStr + ' `' + i['name'] + '` ' + i['operate'] + ' \"' + i['value'] + '\" ' + i['relation']
+    print(sqlStr)
     df.createOrReplaceTempView(tableName)
     sqlDF = spark.sql(sqlStr)
+
     return sqlDF
 
 
