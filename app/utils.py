@@ -56,7 +56,6 @@ def getProjectCurrentDataUrl(projectName):
         }
         Pro = Project.query.filter(*filters).first()
         ProjectAddress = Pro.project_address
-        # print(ProjectAddress)
         filename = ''
         for root, dirs, files in os.walk(ProjectAddress):
             # print(root) #当前目录路径
@@ -71,7 +70,8 @@ def getProjectCurrentDataUrl(projectName):
         if filename == '':
             return "error"
         else:
-            return {'fileUrl': ProjectAddress+'/'+filename, 'projectAddress': ProjectAddress}
+            # return {'fileUrl': ProjectAddress+'/'+filename, 'projectAddress': ProjectAddress}
+            return {'fileUrl': 'file://' + ProjectAddress+'/'+filename, 'projectAddress': ProjectAddress}
     except:
         return "error"
 

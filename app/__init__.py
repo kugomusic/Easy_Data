@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -9,7 +11,5 @@ CORS(app, supports_credentials=True)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 #
-from app.views import mysql
-from app.views import exploration
-from app.views import process, operateFlow
+from app.views import mysql, exploration, process, operateFlow, featureEngineering
 from app import test
