@@ -13,8 +13,8 @@ from pyspark.sql.functions import split, explode, concat_ws, regexp_replace
 from pyspark.ml.feature import *
 
 # csv文件存储目录（临时）
-save_dir = "/home/zk/project/test.csv"
-# save_dir = "/Users/tc/Desktop/可视化4.0/Project/test.csv"
+# save_dir = "/home/zk/project/test.csv"
+save_dir = "/Users/tc/Desktop/可视化4.0/Project/test.csv"
 
 
 # 分位数离散化页面路由

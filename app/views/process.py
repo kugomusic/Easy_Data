@@ -14,8 +14,8 @@ import random
 import string
 
 # csv文件存储目录（临时）
-save_dir = "/home/zk/project/test.csv"
-# save_dir = "/Users/tc/Desktop/可视化4.0/Project/test.csv"
+# save_dir = "/home/zk/project/test.csv"
+save_dir = "/Users/tc/Desktop/可视化4.0/Project/test.csv"
 # save_dir = '/Users/kang/PycharmProjects/project/test.csv'
 
 
