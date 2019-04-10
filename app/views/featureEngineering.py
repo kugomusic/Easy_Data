@@ -22,11 +22,11 @@ save_dir = "/Users/tc/Desktop/可视化4.0/Project/test.csv"
 def quantileDiscretization():
     # 接受请求传参，例如: {"project":"订单分析","columnName":"装运成本","newColumnName":"装运成本(分位数离散化)"}
     # 参数中可指定分箱数numBuckets, 默认为5
-    requestStr = request.args.get("requestStr")
+    requestStr = request.form.get("requestStr")
 
     # 执行主函数，获取df(spark格式)
     df = quantileDiscretizationCore(requestStr)
-    if df == "error1":
+    if df == "error_projectUrl":
         return "error: 项目名或项目路径有误"
     elif df == "error2":
         return "error: 只能离散化数值型的列，请检查列名输入是否有误"
@@ -36,7 +36,7 @@ def quantileDiscretization():
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
     df_pandas.to_csv(save_dir, header=True)
 
-    return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
+    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
 
 
 # 分位数离散化主函数, 将某列连续型数值进行分箱，加入新列；返回df(spark格式)
@@ -57,7 +57,7 @@ def quantileDiscretizationCore(requestStr):
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
     if urls == 'error':
-        return 'error1'  # 错误类型：项目名或项目路径有误
+        return 'error_projectUrl'  # 错误类型：项目名或项目路径有误
     fileUrl = urls['fileUrl']
     df = spark.read.csv(fileUrl, header=True, inferSchema=True)
 
@@ -93,11 +93,11 @@ def quantileDiscretizationCore(requestStr):
 def vectorIndexer():
     # 接受请求传参，例如: {"project":"订单分析","columnName":"装运成本","newColumnName":"向量索引转换结果"}
     # 参数中指定分类标准maxCategories, 默认为20（maxCategories是一个阈值，如[1.0, 2.0, 2.5]的categories是3，小于20，属于分类类型；否则为连续类型）
-    requestStr = request.args.get("requestStr")
+    requestStr = request.form.get("requestStr")
 
     # 执行主函数，获取df(spark格式)
     df = vectorIndexerCore(requestStr)
-    if df == "error1":
+    if df == "error_projectUrl":
         return "error: 项目名或项目路径有误"
     elif df == "error2":
         return "error: 只能转化数值型的列，请检查列名输入是否有误"
@@ -107,7 +107,7 @@ def vectorIndexer():
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
     df_pandas.to_csv(save_dir, header=True)
 
-    return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
+    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
 
 
 # 向量索引转换主函数, 将向量转换成标签索引格式，加入新列；返回df(spark格式)
@@ -128,7 +128,7 @@ def vectorIndexerCore(requestStr):
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
     if urls == 'error':
-        return 'error1'  # 错误类型：项目名或项目路径有误
+        return 'error_projectUrl'  # 错误类型：项目名或项目路径有误
     fileUrl = urls['fileUrl']
     df = spark.read.csv(fileUrl, header=True, inferSchema=True)
 
@@ -167,11 +167,11 @@ def vectorIndexerCore(requestStr):
 @app.route('/standardScaler', methods=['GET', 'POST'])
 def standardScaler():
     # 接受请求传参，例如: {"project":"订单分析","columnName":"利润","newColumnName":"利润(标准化)"}
-    requestStr = request.args.get("requestStr")
+    requestStr = request.form.get("requestStr")
 
     # 执行主函数，获取df(spark格式)
     df = standardScalerCore(requestStr)
-    if df == "error1":
+    if df == "error_projectUrl":
         return "error: 项目名或项目路径有误"
     elif df == "error2":
         return "error: 只能标准化数值型的列，请检查列名输入是否有误"
@@ -181,7 +181,7 @@ def standardScaler():
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
     df_pandas.to_csv(save_dir, header=True)
 
-    return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
+    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
 
 
 # 标准化列主函数, 标准化列，使其拥有零均值和等于1的标准差；返回df(spark格式)
@@ -202,7 +202,7 @@ def standardScalerCore(requestStr):
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
     if urls == 'error':
-        return 'error1'  # 错误类型：项目名或项目路径有误
+        return 'error_projectUrl'  # 错误类型：项目名或项目路径有误
     fileUrl = urls['fileUrl']
     df = spark.read.csv(fileUrl, header=True, inferSchema=True)
 
@@ -235,11 +235,11 @@ def standardScalerCore(requestStr):
 @app.route('/pca', methods=['GET', 'POST'])
 def pca():
     # 接受请求传参，例如: {"project":"订单分析","columnNames":["销售额","数量","折扣","利润","装运成本"],"newColumnName":"降维结果"}
-    requestStr = request.args.get("requestStr")
+    requestStr = request.form.get("requestStr")
 
     # 执行主函数，获取df(spark格式)
     df = pcaCore(requestStr)
-    if df == "error1":
+    if df == "error_projectUrl":
         return "error: 项目名或项目路径有误"
     elif df == "error2":
         return "error: 只能降维数值型的列，请检查列名输入是否有误"
@@ -249,7 +249,7 @@ def pca():
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
     df_pandas.to_csv(save_dir, header=True)
 
-    return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
+    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
 
 
 # 降维主函数, PCA训练一个模型将向量投影到前k个主成分的较低维空间；返回df(spark格式)
@@ -270,7 +270,7 @@ def pcaCore(requestStr):
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
     if urls == 'error':
-        return 'error1'  # 错误类型：项目名或项目路径有误
+        return 'error_projectUrl'  # 错误类型：项目名或项目路径有误
     fileUrl = urls['fileUrl']
     df = spark.read.csv(fileUrl, header=True, inferSchema=True)
 
@@ -310,11 +310,11 @@ def pcaCore(requestStr):
 def stringIndexer():
     # 接受请求传参，例如: {"project":"订单分析","columnName":"客户名称","newColumnName":"客户名称(标签化，按频率排序，0为频次最高)"}
     # 参数中可指定分箱数numBuckets, 默认为5
-    requestStr = request.args.get("requestStr")
+    requestStr = request.form.get("requestStr")
 
     # 执行主函数，获取df(spark格式)
     df = stringIndexerCore(requestStr)
-    if df == "error1":
+    if df == "error_projectUrl":
         return "error: 项目名或项目路径有误"
 
     # 处理后的数据写入文件（借助pandas进行存储、返回）
@@ -322,7 +322,7 @@ def stringIndexer():
     # df_pandas.to_csv("/Users/tc/Desktop/可视化4.0/Project/test.csv", header=True)
     df_pandas.to_csv(save_dir, header=True)
 
-    return jsonify({'length': df.count(), 'data': df_pandas.to_json()})
+    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
 
 
 # 字符串转标签主函数, 将字符串转换成标签，加入新列；返回df(spark格式)
@@ -344,7 +344,7 @@ def stringIndexerCore(requestStr):
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
     if urls == 'error':
-        return 'error1'  # 错误类型：项目名或项目路径有误
+        return 'error_projectUrl'  # 错误类型：项目名或项目路径有误
     fileUrl = urls['fileUrl']
     df = spark.read.csv(fileUrl, header=True, inferSchema=True)
 
