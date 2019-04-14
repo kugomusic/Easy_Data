@@ -339,14 +339,12 @@ def scatterPlot():
         if df[columnName].dtype not in acceptTypes:
             return "只能画出数值型列的散点图，但是列 <" + columnName + "> 的类型为 " + str(df[columnName].dtype)
     # 写入散点数据
+    col1 = columnNames[0]
+    col2 = columnNames[1]
     res = {}
-    for col1 in columnNames:
-        for col2 in columnNames:
-            combineKey = col1 + ' + ' + col2
-            if col1 == col2:
-                res.setdefault(combineKey, 'equal')             # 同列是否需要数据画出散点图？
-            else:
-                res.setdefault(combineKey, df[[col1, col2]].values.tolist())
+    res.setdefault("keys", [col1, col2])
+    data = df[[col1, col2]].values.tolist()
+    res.setdefault("values", data)
 
     # 写入文件
     mkdir(projectAddress + '/散点图')
