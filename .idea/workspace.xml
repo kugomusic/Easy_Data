@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a582c29d-048b-4f1a-8eea-bfcf32f1b0bc" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/app/views/exploration.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/exploration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/featureEngineering.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/featureEngineering.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/views/process.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/views/process.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -13,7 +15,7 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/Easy_Data$run.coverage" NAME="run Coverage Results" MODIFIED="1554649015807" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ED$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1552496889427" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ED$run.coverage" NAME="run Coverage Results" MODIFIED="1555037442428" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ED$run.coverage" NAME="run Coverage Results" MODIFIED="1555294135054" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ED$process.coverage" NAME="process Coverage Results" MODIFIED="1553238292483" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ED$text.coverage" NAME="text Coverage Results" MODIFIED="1552278718207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ED$ED.coverage" NAME="ED Coverage Results" MODIFIED="1554617438577" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -38,11 +40,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/views/featureEngineering.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="338">
-              <caret line="425" column="13" lean-forward="true" selection-start-line="425" selection-start-column="13" selection-end-line="425" selection-end-column="13" />
+            <state relative-caret-position="259">
+              <caret line="93" column="12" selection-start-line="93" selection-start-column="12" selection-end-line="93" selection-end-column="12" />
               <folding>
                 <element signature="e#24#68#0" expanded="true" />
               </folding>
@@ -50,11 +52,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/views/process.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="235">
-              <caret line="138" column="51" lean-forward="true" selection-start-line="135" selection-start-column="4" selection-end-line="138" selection-end-column="51" />
+            <state relative-caret-position="338">
+              <caret line="518" column="13" lean-forward="true" selection-start-line="518" selection-start-column="13" selection-end-line="518" selection-end-column="13" />
               <folding>
                 <element signature="e#24#149#0" expanded="true" />
               </folding>
@@ -65,8 +67,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/views/exploration.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4707">
-              <caret line="347" lean-forward="true" selection-start-line="347" selection-end-line="347" />
+            <state relative-caret-position="314">
+              <caret line="350" column="50" lean-forward="true" selection-start-line="350" selection-start-column="50" selection-end-line="350" selection-end-column="50" />
             </state>
           </provider>
         </entry>
@@ -86,7 +88,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/views/featureEngineering2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
+            <state relative-caret-position="195">
               <caret line="17" column="38" selection-start-line="17" selection-start-column="38" selection-end-line="17" selection-end-column="38" />
               <folding>
                 <element signature="e#24#149#0" expanded="true" />
@@ -134,6 +136,12 @@
       <find>'GET'</find>
       <find>error2</find>
       <find>'project'</find>
+      <find>error_columnInputNum</find>
+      <find>withCo</find>
+      <find>error_nume</find>
+      <find>error_nu</find>
+      <find>accept</find>
+      <find>acce</find>
     </findStrings>
     <replaceStrings>
       <replace>Easy Data</replace>
@@ -145,6 +153,7 @@
       <replace>df_pandas.to_json(force_ascii=False)</replace>
       <replace>error_projectUrl</replace>
       <replace>error_numerical</replace>
+      <replace>error_columnInputNumSingle</replace>
       <replace>'projectName'</replace>
     </replaceStrings>
   </component>
@@ -173,8 +182,8 @@
         <option value="$PROJECT_DIR$/run.py" />
         <option value="$PROJECT_DIR$/app/views/process.py" />
         <option value="$PROJECT_DIR$/config.py" />
-        <option value="$PROJECT_DIR$/app/views/featureEngineering.py" />
         <option value="$PROJECT_DIR$/app/views/exploration.py" />
+        <option value="$PROJECT_DIR$/app/views/featureEngineering.py" />
       </list>
     </option>
   </component>
@@ -387,12 +396,12 @@
       <workItem from="1554824326629" duration="1421000" />
       <workItem from="1554825948330" duration="509000" />
       <workItem from="1554827086286" duration="15025000" />
-      <workItem from="1554910190265" duration="13486000" />
+      <workItem from="1554910190265" duration="25072000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="35187000" />
+    <option name="totallyTimeSpent" value="46773000" />
   </component>
   <component name="TodoView" selected-index="3">
     <todo-panel id="selected-file">
@@ -574,32 +583,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/featureEngineering2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="17" column="38" selection-start-line="17" selection-start-column="38" selection-end-line="17" selection-end-column="38" />
-          <folding>
-            <element signature="e#24#149#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/views/mysql.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1417">
           <caret line="20" column="48" lean-forward="true" selection-start-line="20" selection-start-column="48" selection-end-line="20" selection-end-column="48" />
           <folding>
             <element signature="e#16#26#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/views/process.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="235">
-          <caret line="138" column="51" lean-forward="true" selection-start-line="135" selection-start-column="4" selection-end-line="138" selection-end-column="51" />
-          <folding>
-            <element signature="e#24#149#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -611,19 +600,46 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm2018.3/remote_sources/-1873125346/-798664301/flask/app.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="1220" selection-start-line="1220" selection-end-line="1220" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/app/views/exploration.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4707">
-          <caret line="347" lean-forward="true" selection-start-line="347" selection-end-line="347" />
+        <state relative-caret-position="314">
+          <caret line="350" column="50" lean-forward="true" selection-start-line="350" selection-start-column="50" selection-end-line="350" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/featureEngineering2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="17" column="38" selection-start-line="17" selection-start-column="38" selection-end-line="17" selection-end-column="38" />
+          <folding>
+            <element signature="e#24#149#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/views/featureEngineering.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="338">
-          <caret line="425" column="13" lean-forward="true" selection-start-line="425" selection-start-column="13" selection-end-line="425" selection-end-column="13" />
+        <state relative-caret-position="259">
+          <caret line="93" column="12" selection-start-line="93" selection-start-column="12" selection-end-line="93" selection-end-column="12" />
           <folding>
             <element signature="e#24#68#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/views/process.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="338">
+          <caret line="518" column="13" lean-forward="true" selection-start-line="518" selection-start-column="13" selection-end-line="518" selection-end-column="13" />
+          <folding>
+            <element signature="e#24#149#0" expanded="true" />
           </folding>
         </state>
       </provider>
