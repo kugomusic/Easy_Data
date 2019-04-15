@@ -142,7 +142,7 @@ def sort():
     df = sortCore(requestStr)
     if df == "error_projectUrl":
         return "error: 项目名或项目路径有误"
-    elif df == "error_columnInputNum":
+    elif df == "error_columnInputNumSingle":
         return "error: 只能选择一列进行排序"
 
     # 处理后的数据写入文件（借助pandas进行存储、返回）
@@ -162,7 +162,7 @@ def sortCore(requestStr):
     columnName = requestDict['columnName']
     # 只能输入一列，否则报错
     if len(columnName.split(",")) != 1:
-        return "error_columnInputNum"
+        return "error_columnInputNumSingle"
     # sortType默认为升序，若用户指定，以用户指定为准
     try:
         sortType = requestDict['sortType']
@@ -213,7 +213,7 @@ def columnSplit():
     df = columnSplitCore(requestStr)
     if df == "error_projectUrl":
         return "error: 项目名或项目路径有误"
-    elif df == "error_columnInputNum":
+    elif df == "error_columnInputNumSingle":
         return "error: 只能选择一列进行拆分"
     elif df == "error_splitSymbol":
         return "error: 您指定的列中无可供拆分的符号"
@@ -236,7 +236,7 @@ def columnSplitCore(requestStr):
     columnName = requestDict['columnName']
     # 只能输入一列，否则报错
     if len(columnName.split(",")) != 1:
-        return "error_columnInputNum"
+        return "error_columnInputNumSingle"
     # 获取拆分出的新列的列名，若未指定，暂时存储为空列表，后续根据拆分数填充成为[拆分列1,拆分列2,拆分列3,...]
     try:
         newColumnNames = requestDict['newColumnNames']
@@ -319,7 +319,7 @@ def rowSplit():
     df = rowSplitCore(requestStr)
     if df == "error_projectUrl":
         return "error: 项目名或项目路径有误"
-    elif df == "error_columnInputNum":
+    elif df == "error_columnInputNumSingle":
         return "error: 只能选择一列进行拆分"
     elif df == "error_splitSymbol":
         return "error: 您指定的列中无可供拆分的符号"
@@ -340,7 +340,7 @@ def rowSplitCore(requestStr):
     columnName = requestDict['columnName']
     # 只能输入一列，否则报错
     if len(columnName.split(",")) != 1:
-        return "error_columnInputNum"
+        return "error_columnInputNumSingle"
     # newColumnName默认为columnName+“拆分”，若用户指定，以用户指定为准
     try:
         newColumnName = requestDict['newColumnName']
@@ -468,7 +468,7 @@ def replace():
     df = replaceCore(requestStr)
     if df == "error_projectUrl":
         return "error: 项目名或项目路径有误"
-    elif df == "error_columnInputNum":
+    elif df == "error_columnInputNumSingle":
         return "error: 只能选择一列进行替换"
 
     # 处理后的数据写入文件（借助pandas进行存储、返回）
@@ -486,7 +486,7 @@ def replaceCore(requestStr):
     columnName = requestDict['columnName']
     # 只能输入一列，否则报错
     if len(columnName.split(",")) != 1:
-        return "error_columnInputNum"
+        return "error_columnInputNumSingle"
     sourceCharacter = requestDict['sourceCharacter']
     targetCharacter = requestDict['targetCharacter']
 
