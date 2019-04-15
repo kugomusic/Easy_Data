@@ -12,12 +12,9 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import split, explode, concat_ws, regexp_replace
 import random
 import string
+from app.constFile import const
 
-# csv文件存储目录（临时）
-save_dir = "/home/zk/project/test.csv"
-# save_dir = "/Users/tc/Desktop/可视化4.0/Project/test.csv"
-# save_dir = '/Users/kang/PycharmProjects/project/test.csv'
-
+save_dir = const.SAVEDIR
 
 # 欢迎页面
 @app.route("/", methods=['GET', 'POST'])

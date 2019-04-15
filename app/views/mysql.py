@@ -13,7 +13,7 @@ import json
 import pandas as pd
 import os
 from app.utils import mkdir, getProjectCurrentDataUrl, getProjectByNameAndUserId
-
+from app.constFile import const
 
 #解决 list, dict 不能返回的问题
 class MyResponse(Response):
@@ -49,9 +49,7 @@ def creatProject():
         dataSourceId = request.form.get('dataSourceId')
         userId = request.form.get('userId')
     print('projectName: {}, dataSourceId: {}, userId: {}'.format(projectName, dataSourceId,userId))
-    # rootUrl = '/home/zk/project/'
-    rootUrl = '/Users/kang/PycharmProjects/project'
-    # rootUrl = rootUrl
+    rootUrl = const.ROOTURL
     # 数据库中添加Project记录
     project = Project(project_name=projectName,project_address=rootUrl+projectName,user_id = userId, dataSource_id = dataSourceId)
     db.session.add(project)

@@ -11,6 +11,9 @@ import time
 from app.utils import mkdir,getProjectCurrentDataUrl
 import pandas as pd
 from pyspark.sql import SparkSession
+from app.constFile import const
+
+jsonFileName = const.JSONFILENAME
 
 #解决 list, dict 不能返回的问题
 class MyResponse(Response):
@@ -36,7 +39,6 @@ def getColumnNames():
     except:
         return "error read"
 
-jsonFileName = 'qazwsxedcrfvtgbyhnujmiopkl' + '.json'
 # 全表统计接口
 @app.route("/fullTableStatistics", methods=['POST'])
 def fullTableStatistics():
@@ -88,8 +90,10 @@ def fullTableStatistics():
         res.append(info)
     # 写入文件
     mkdir(projectAddress+'/全表统计')
+    from app.constFile import const
+
+    save_dir = const.SAVEDIR
     # jsonFileName = str(int(time.time()))+'.json'
-    # jsonFileName = 'qazwsxedcrfvtgbyhnujmiopkl' + '.json'
     json_str = json.dumps(res, ensure_ascii=False)
     with open(projectAddress+'/全表统计/' + jsonFileName, "w", encoding="utf-8") as f:
         json.dump(json_str, f, ensure_ascii=False)

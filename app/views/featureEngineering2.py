@@ -12,10 +12,9 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import split, explode, concat_ws, regexp_replace
 import random
 import string
+from app.constFile import const
 
-# csv文件存储目录（临时）
-save_dir = "/home/zk/project/test.csv"
-# save_dir = '/Users/kang/PycharmProjects/project/test.csv'
+save_dir = const.SAVEDIR
 
 #解决 list, dict 不能返回的问题
 class MyResponse(Response):
