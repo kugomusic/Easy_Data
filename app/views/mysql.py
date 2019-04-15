@@ -41,9 +41,9 @@ def getDataSource():
 @app.route('/creatProject', methods=['GET', 'POST'])
 def creatProject():
     if request.method == 'GET':
-        projectName = request.args.get('projectName')
-        dataSourceId = request.args.get('dataSourceId')
-        userId =  request.args.get('userId')
+        projectName = request.form.get('projectName')
+        dataSourceId = request.form.get('dataSourceId')
+        userId =  request.form.get('userId')
     else:
         projectName = request.form.get('projectName')
         dataSourceId = request.form.get('dataSourceId')
@@ -90,9 +90,9 @@ def getProjectList():
 @app.route('/rawDataPreview', methods=['GET','POST'])
 def rawDataPreview():
     if request.method == 'GET':
-        start = request.args.get('start')
-        end = request.args.get('end')
-        projectName =  request.args.get('projectName')
+        start = request.form.get('start')
+        end = request.form.get('end')
+        projectName =  request.form.get('projectName')
     else:
         start = request.form.get('start')
         end = request.form.get('end')
@@ -114,9 +114,9 @@ def rawDataPreview():
 @app.route('/currentDataPreview', methods=['GET','POST'])
 def currentDataPreview():
     if request.method == 'GET':
-        start = request.args.get('start')
-        end = request.args.get('end')
-        projectName =  request.args.get('projectName')
+        start = request.form.get('start')
+        end = request.form.get('end')
+        projectName =  request.form.get('projectName')
     else:
         start = request.form.get('start')
         end = request.form.get('end')

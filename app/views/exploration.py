@@ -106,7 +106,7 @@ def getfileListFun(viewsName,projectName):
     if(viewsName == 'FullTableStatisticsView'):
         viewsName = '全表统计'
     elif(viewsName == 'FrequencyStatisticsView'):
-        viewsName = '频率统计'
+        viewsName = '频次统计'
     elif (viewsName == 'CorrelationCoefficientView'):
         viewsName = '相关系数'
     elif (viewsName == 'ScatterPlot'):
@@ -141,8 +141,14 @@ def getViewData():
     viewFileName = request.form.get("viewFileName")
     print('viewsName: {}, projectName: {}, viewFileName: {}'.format(viewsName, projectName, viewFileName))
     urls = getProjectCurrentDataUrl(projectName)
-    if(viewsName == 'FullTableStatisticsView'):
+    if (viewsName == 'FullTableStatisticsView'):
         viewsName = '全表统计'
+    elif (viewsName == 'FrequencyStatisticsView'):
+        viewsName = '频次统计'
+    elif (viewsName == 'CorrelationCoefficientView'):
+        viewsName = '相关系数'
+    elif (viewsName == 'ScatterPlot'):
+        viewsName = '散点图'
     viewFileUrl = urls['projectAddress']+'/'+viewsName+'/' + viewFileName +'.json'
     # 读入数据
     with open(viewFileUrl, 'r') as load_f:
@@ -158,8 +164,14 @@ def saveViewData():
     newFileName = request.form.get("newFileName")
     print('viewsName: {}, projectName: {}, newFileName: {}'.format(viewsName, projectName, newFileName))
     urls = getProjectCurrentDataUrl(projectName)
-    if(viewsName == 'FullTableStatisticsView'):
+    if (viewsName == 'FullTableStatisticsView'):
         viewsName = '全表统计'
+    elif (viewsName == 'FrequencyStatisticsView'):
+        viewsName = '频次统计'
+    elif (viewsName == 'CorrelationCoefficientView'):
+        viewsName = '相关系数'
+    elif (viewsName == 'ScatterPlot'):
+        viewsName = '散点图'
     viewFileUrl = urls['projectAddress']+'/'+viewsName+'/' + jsonFileName
     newfile_path = urls['projectAddress']+'/'+viewsName+'/' + newFileName + '.json'
     # 复制文件
@@ -196,11 +208,16 @@ def getColumnNamesAndViews():
 # 频次统计
 @app.route('/frequencyStatistics', methods=['GET', 'POST'])
 def frequencyStatistics():
-    # 接受请求传参，参数格式为json->字典, 例如: {"project":"医药病例分类分析","columnName":"Item"}
-    requestStr = request.args.get("requestStr")
-    requestDict = json.loads(requestStr)
-    projectName = requestDict['project']
-    columnName = requestDict['columnName']
+    # 接受请求传参，参数包括：projectName，columnName（只能选一列）
+    # 例如：projectName=医药病例分类分析；columnName=Item
+    projectName = request.form.get("projectName")
+    columnName = request.form.get("columnNames")
+    # 报错信息，限选一列
+    if len(columnName.split(",")) > 1:
+        print(len(columnName.split(",")))
+        return "频次统计只能选择一列，请勿多选"
+    columnName = columnName.strip("[]")
+    columnName = columnName.strip('""')
 
     # 读取项目对应的当前数据
     urls = getProjectCurrentDataUrl(projectName)
@@ -227,6 +244,7 @@ def frequencyStatistics():
         json.dump(json_str, f)
         print("存储json文件完成...")
     response = jsonify(res)
+    print(res)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
@@ -234,8 +252,15 @@ def frequencyStatistics():
 # 相关系数
 @app.route('/correlationCoefficient', methods=['GET', 'POST'])
 def correlationCoefficient():
-    # 接受请求传参, projectName = "订单分析"
-    projectName = request.args.get("project")
+    # 接受请求传参, 参数包括projectName，columnNames（多选，仅限数值型）
+    # 例如：projectName=订单分析；columnNames=销售额,折扣,装运成本
+    projectName = request.form.get("projectName")
+    columnNameStr = request.form.get("columnNames")
+    columnNameStr = columnNameStr.strip("[]")
+    columnNames = columnNameStr.split(',')
+    for i in range(len(columnNames)):
+        columnNames[i] = columnNames[i].strip('""')
+    print('projectName: {}, columnNames: {}'.format(projectName, columnNames))
 
     # 读取项目对应的当前数据
     urls = getProjectCurrentDataUrl(projectName)
@@ -248,14 +273,25 @@ def correlationCoefficient():
     else:
         df = pd.read_excel(fileUrl, encoding="utf-8")
 
+    # 报错信息：如果所选列不是数值型，则报错
+    acceptTypes = ['int64', 'float64']
+    for columnName in columnNames:
+        if df[columnName].dtype not in acceptTypes:
+            return "只能计算数值型列的相关系数，但是 <" + columnName + "> 的类型为 " + str(df[columnName].dtype)
+
     # 计算出相关系数矩阵df
     df = df.corr()
     res = {}
+    print(df)
+    # 转存成为dict，此时对数据进行过滤，只显示用户在columnNames里面选择的列
     for index in df.index:
-        temp = {}
-        for column in df.columns:
-            temp.setdefault(column, df.loc[index, column])
-        res.setdefault(index, temp)
+        if index in columnNames:
+            temp = {}
+            for column in df.columns:
+                if column in columnNames:
+                    temp.setdefault(column, df.loc[index, column])
+            res.setdefault(index, temp)
+    print(res)
 
     # 写入文件
     mkdir(projectAddress + '/相关系数')
@@ -272,17 +308,19 @@ def correlationCoefficient():
 # 散点图
 @app.route('/scatterPlot', methods=['GET', 'POST'])
 def scatterPlot():
-    # 接受请求传参，参数格式为json->字典, 例如: {"project":"订单分析","columnNames":"['销售额', '数量', '折扣', '利润', '装运成本']"}
-    requestStr = request.args.get("requestStr")
-    requestDict = json.loads(requestStr)
-    projectName = requestDict['project']
-    columnNamesStr = requestDict['columnNames'].strip('[]')
-    columnNames = []
-    temp = columnNamesStr.split(',')
-    for column in temp:
-        column = column.strip()
-        column = column.strip("''")
-        columnNames.append(column)
+    # 接受请求传参，参数包括：projectName，columnNames（必须选两列，数值型）
+    # 例如：projectName=订单分析，columnNames=
+    projectName = request.form.get("projectName")
+    columnNameStr = request.form.get("columnNames")
+    columnNameStr = columnNameStr.strip("[]")
+    columnNames = columnNameStr.split(',')
+    for i in range(len(columnNames)):
+        columnNames[i] = columnNames[i].strip('""')
+    print('projectName: {}, columnNames: {}'.format(projectName, columnNames))
+
+    # 报错：若选择多于两列，则报错
+    if len(columnNames) != 2:
+        return "请选择两列，目前的选择为" + str(columnNames)
 
     # 读取项目对应的当前数据
     urls = getProjectCurrentDataUrl(projectName)
@@ -299,16 +337,14 @@ def scatterPlot():
     acceptTypes = ['int64', 'float64']
     for columnName in columnNames:
         if df[columnName].dtype not in acceptTypes:
-            return "Can only draw Scatter plot with numeric fields, but " + columnName + " is " + str(df[columnName].dtype)
+            return "只能画出数值型列的散点图，但是列 <" + columnName + "> 的类型为 " + str(df[columnName].dtype)
     # 写入散点数据
+    col1 = columnNames[0]
+    col2 = columnNames[1]
     res = {}
-    for col1 in columnNames:
-        for col2 in columnNames:
-            combineKey = col1 + ' + ' + col2
-            if col1 == col2:
-                res.setdefault(combineKey, 'equal')             # 同列是否需要数据画出散点图？
-            else:
-                res.setdefault(combineKey, df[[col1, col2]].values.tolist())
+    res.setdefault("keys", [col1, col2])
+    data = df[[col1, col2]].values.tolist()
+    res.setdefault("values", data)
 
     # 写入文件
     mkdir(projectAddress + '/散点图')
