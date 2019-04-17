@@ -183,9 +183,9 @@ def saveViewData():
         shutil.copyfile(viewFileUrl, newfile_path)
         print('保存成功')
         return getfileListFun(viewsName, projectName)
-    except:
-        print('保存失败')
-        return '保存失败'
+    except Exception as e:
+        print('保存失败', e)
+        return '保存失败' + str(e)
 
 
 # 获取项目对应的当前数据源的所有列名和所有视图（）
