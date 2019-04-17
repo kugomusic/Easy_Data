@@ -242,11 +242,11 @@ def frequencyStatistics():
 
     # 写入文件
     mkdir(projectAddress + '/频次统计')
-    jsonFileName = str(int(time.time())) + '.json'
-    json_str = json.dumps(res)
-    with open(projectAddress + '/频次统计/' + jsonFileName, "w") as f:
-        json.dump(json_str, f)
-        print("存储json文件完成...")
+    json_str = json.dumps(res, ensure_ascii=False)
+    with open(projectAddress + '/频次统计/' + jsonFileName, "w", encoding="utf-8") as f:
+        json.dump(json_str, f, ensure_ascii=False)
+        print("加载入文件完成...")
+
     response = jsonify(res)
     print(res)
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -299,11 +299,10 @@ def correlationCoefficient():
 
     # 写入文件
     mkdir(projectAddress + '/相关系数')
-    jsonFileName = str(int(time.time())) + '.json'
-    json_str = json.dumps(res)
-    with open(projectAddress + '/相关系数/' + jsonFileName, "w") as f:
-        json.dump(json_str, f)
-        print("存储json文件完成...")
+    json_str = json.dumps(res, ensure_ascii=False)
+    with open(projectAddress + '/相关系数/' + jsonFileName, "w", encoding="utf-8") as f:
+        json.dump(json_str, f, ensure_ascii=False)
+        print("加载入文件完成...")
     response = jsonify(res)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
@@ -352,11 +351,11 @@ def scatterPlot():
 
     # 写入文件
     mkdir(projectAddress + '/散点图')
-    jsonFileName = str(int(time.time())) + '.json'
-    json_str = json.dumps(res)
-    with open(projectAddress + '/散点图/' + jsonFileName, "w") as f:
-        json.dump(json_str, f)
-        print("存储json文件完成...")
+    json_str = json.dumps(res, ensure_ascii=False)
+    with open(projectAddress + '/散点图/' + jsonFileName, "w", encoding="utf-8") as f:
+        json.dump(json_str, f, ensure_ascii=False)
+        print("加载入文件完成...")
+
     response = jsonify(res)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
