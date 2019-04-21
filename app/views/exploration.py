@@ -364,7 +364,10 @@ def scatterPlot():
     col2 = columnNames[1]
     res = {}
     res.setdefault("keys", [col1, col2])
-    data = df[[col1, col2]].values.tolist()
+    if len(df) > 50:
+        data = df[[col1, col2]].sample(n=50).values.tolist()
+    else:
+        data = df[[col1, col2]].values.tolist()
     res.setdefault("values", data)
 
     # 写入文件
