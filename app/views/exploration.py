@@ -29,13 +29,31 @@ app.response_class = MyResponse
 @app.route("/getColumnNames", methods=['GET','POST'])
 def getColumnNames():
     if request.method == 'GET':
-        projectName =  request.args.get('projectName')
+        projectName = request.args.get('projectName')
     else:
         projectName = request.form.get('projectName')
     fileUrl = getProjectCurrentDataUrl(projectName)['fileUrl']
     try:
         data = pd.read_csv(fileUrl, encoding='utf-8')
         return data.columns.values.tolist()
+    except:
+        return "error read"
+
+# 获取项目对应的当前数据源的 数值型 的列名
+@app.route("/getColumnNameWithNumberType", methods=['GET','POST'])
+def getColumnNameWithNumberType():
+    if request.method == 'GET':
+        projectName = request.args.get('projectName')
+    else:
+        projectName = request.form.get('projectName')
+    fileUrl = getProjectCurrentDataUrl(projectName)['fileUrl']
+    try:
+        data = pd.read_csv(fileUrl, encoding='utf-8')
+        res = []
+        for col in data.columns.values.tolist():
+            if(data[col].dtype == 'int64' or data[col].dtype == 'float64'):
+                res.append(col)
+        return res
     except:
         return "error read"
 
