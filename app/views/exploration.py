@@ -187,6 +187,36 @@ def saveViewData():
         print('保存失败', e)
         return '保存失败' + str(e)
 
+# 删除某一类视图中的一个视图
+@app.route("/deleteViewData", methods=['POST'])
+def deleteViewData():
+    viewsName = request.form.get("viewsName")
+    projectName = request.form.get("projectName")
+    jsonFileName = request.form.get("jsonFileName")
+    print('viewsName: {}, projectName: {}'.format(viewsName, projectName))
+    urls = getProjectCurrentDataUrl(projectName)
+    if (viewsName == 'FullTableStatisticsView'):
+        viewsName = '全表统计'
+    elif (viewsName == 'FrequencyStatisticsView'):
+        viewsName = '频次统计'
+    elif (viewsName == 'CorrelationCoefficientView'):
+        viewsName = '相关系数'
+    elif (viewsName == 'ScatterPlot'):
+        viewsName = '散点图'
+    viewFileUrl = urls['projectAddress']+'/'+viewsName+'/' + jsonFileName
+    # 创建垃圾箱，并将该文件移动至垃圾箱中；层级关系：project/垃圾箱/view
+    mkdir(urls['projectAddress'] + '/垃圾箱')
+    mkdir(urls['projectAddress'] + '/垃圾箱' + '/' + viewsName)
+    newfile_path = urls['projectAddress'] + '/垃圾箱' + '/' + viewsName + '/' + jsonFileName
+    # 复制文件
+    try:
+        shutil.move(viewFileUrl, newfile_path)
+        print('删除成功')
+        return getfileListFun(viewsName, projectName)
+    except Exception as e:
+        print('删除失败', e)
+        return '删除失败' + str(e)
+
 
 # 获取项目对应的当前数据源的所有列名和所有视图（）
 @app.route("/getColumnNamesAndViews", methods=['GET','POST'])
