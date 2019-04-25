@@ -205,13 +205,13 @@ def saveViewData():
         print('保存失败', e)
         return '保存失败' + str(e)
 
-# 删除某一类视图中的一个视图
+# 删除视图
 @app.route("/deleteViewData", methods=['POST'])
 def deleteViewData():
     viewsName = request.form.get("viewsName")
     projectName = request.form.get("projectName")
     jsonFileName = request.form.get("jsonFileName")
-    print('viewsName: {}, projectName: {}'.format(viewsName, projectName))
+    print('viewsName: {}, projectName: {}, jsonFileName: {}'.format(viewsName, projectName, jsonFileName))
     urls = getProjectCurrentDataUrl(projectName)
     if (viewsName == 'FullTableStatisticsView'):
         viewsName = '全表统计'
@@ -221,19 +221,34 @@ def deleteViewData():
         viewsName = '相关系数'
     elif (viewsName == 'ScatterPlot'):
         viewsName = '散点图'
-    viewFileUrl = urls['projectAddress']+'/'+viewsName+'/' + jsonFileName
-    # 创建垃圾箱，并将该文件移动至垃圾箱中；层级关系：project/垃圾箱/view
+
+    # 创建垃圾箱, 层级关系：project/垃圾箱/view
     mkdir(urls['projectAddress'] + '/垃圾箱')
     mkdir(urls['projectAddress'] + '/垃圾箱' + '/' + viewsName)
-    newfile_path = urls['projectAddress'] + '/垃圾箱' + '/' + viewsName + '/' + jsonFileName
-    # 移动文件
-    try:
-        shutil.move(viewFileUrl, newfile_path)
-        print('删除成功')
-        return getfileListFun(viewsName, projectName)
-    except Exception as e:
-        print('删除失败', e)
-        return '删除失败' + str(e)
+
+    # 待删除文件列表
+    deleteFiles = []
+    if jsonFileName == "all":
+        for root, dirs, files in os.walk(urls['projectAddress']+'/'+viewsName):
+            deleteFiles = files
+    else:
+        deleteFiles = jsonFileName.split(",")
+
+    # 按照删除列表进行文件移动
+    for fileName in deleteFiles:
+        if fileName == const.JSONFILENAME:
+            continue
+        viewFileUrl = urls['projectAddress']+'/'+viewsName+'/' + fileName
+        newfile_path = urls['projectAddress'] + '/垃圾箱' + '/' + viewsName + '/' + fileName
+        # 移动文件
+        try:
+            shutil.move(viewFileUrl, newfile_path)
+        except Exception as e:
+            print('删除失败', e)
+            return '删除失败' + str(e)
+
+    print('删除成功')
+    return getfileListFun(viewsName, projectName)
 
 
 # 恢复已删除的视图
@@ -242,6 +257,47 @@ def restoreViewData():
     viewsName = request.form.get("viewsName")
     projectName = request.form.get("projectName")
     jsonFileName = request.form.get("jsonFileName")
+    print('viewsName: {}, projectName: {}, jsonFileName: {}'.format(viewsName, projectName, jsonFileName))
+    urls = getProjectCurrentDataUrl(projectName)
+    if (viewsName == 'FullTableStatisticsView'):
+        viewsName = '全表统计'
+    elif (viewsName == 'FrequencyStatisticsView'):
+        viewsName = '频次统计'
+    elif (viewsName == 'CorrelationCoefficientView'):
+        viewsName = '相关系数'
+    elif (viewsName == 'ScatterPlot'):
+        viewsName = '散点图'
+
+    # 待恢复文件列表
+    restoreFiles = []
+    if jsonFileName == "all":
+        for root, dirs, files in os.walk(urls['projectAddress'] + '/垃圾箱' + '/' + viewsName):
+            restoreFiles = files
+    else:
+        restoreFiles = jsonFileName.split(",")
+
+    # 按照恢复列表进行文件移动
+    for fileName in restoreFiles:
+        if fileName == const.JSONFILENAME:
+            continue
+        viewFileUrl = urls['projectAddress'] + '/垃圾箱' + '/' + viewsName + '/' + fileName
+        newfile_path = urls['projectAddress'] + '/' + viewsName + '/' + fileName
+        # 移动文件
+        try:
+            shutil.move(viewFileUrl, newfile_path)
+        except Exception as e:
+            print('恢复失败', e)
+            return '恢复失败' + str(e)
+
+    print('恢复成功')
+    return getfileListFun(viewsName, projectName)
+
+
+# 获取垃圾箱中文件的列表
+@app.route("/getFileListFromWastebin", methods=['POST'])
+def getFileListFromWastebin():
+    viewsName = request.form.get("viewsName")
+    projectName = request.form.get("projectName")
     print('viewsName: {}, projectName: {}'.format(viewsName, projectName))
     urls = getProjectCurrentDataUrl(projectName)
     if (viewsName == 'FullTableStatisticsView'):
@@ -252,16 +308,57 @@ def restoreViewData():
         viewsName = '相关系数'
     elif (viewsName == 'ScatterPlot'):
         viewsName = '散点图'
-    viewFileUrl = urls['projectAddress'] + '/垃圾箱' + '/' + viewsName + '/' + jsonFileName
-    newfile_path = urls['projectAddress']+'/'+viewsName+'/' + jsonFileName
-    # 移动文件
-    try:
-        shutil.move(viewFileUrl, newfile_path)
-        print('恢复成功')
-        return getfileListFun(viewsName, projectName)
-    except Exception as e:
-        print('恢复失败', e)
-        return '恢复失败' + str(e)
+    viewFileUrl = urls['projectAddress'] + '/垃圾箱' + '/' + viewsName
+    # 创建垃圾箱，并将该文件移动至垃圾箱中；层级关系：project/垃圾箱/view
+    mkdir(urls['projectAddress'] + '/垃圾箱')
+    mkdir(urls['projectAddress'] + '/垃圾箱' + '/' + viewsName)
+    # 获取文件列表
+    for root, dirs, files in os.walk(viewFileUrl):
+        return files
+
+
+# 彻底删除视图
+@app.route("/deleteCompletely", methods=['POST'])
+def deleteCompletely():
+    viewsName = request.form.get("viewsName")
+    projectName = request.form.get("projectName")
+    jsonFileName = request.form.get("jsonFileName")
+    print('viewsName: {}, projectName: {}, jsonFileName: {}'.format(viewsName, projectName, jsonFileName))
+    urls = getProjectCurrentDataUrl(projectName)
+    if (viewsName == 'FullTableStatisticsView'):
+        viewsName = '全表统计'
+    elif (viewsName == 'FrequencyStatisticsView'):
+        viewsName = '频次统计'
+    elif (viewsName == 'CorrelationCoefficientView'):
+        viewsName = '相关系数'
+    elif (viewsName == 'ScatterPlot'):
+        viewsName = '散点图'
+
+    # 待彻底删除文件列表
+    deleteFiles = []
+    if jsonFileName == "all":
+        for root, dirs, files in os.walk(urls['projectAddress'] + '/垃圾箱' + '/' + viewsName):
+            deleteFiles = files
+    else:
+        deleteFiles = jsonFileName.split(",")
+
+    # 按照删除列表进行彻底删除
+    for fileName in deleteFiles:
+        if fileName == const.JSONFILENAME:
+            continue
+        viewFileUrl = urls['projectAddress'] + '/垃圾箱' + '/' + viewsName+'/' + fileName
+        # 彻底删除文件
+        try:
+            os.remove(viewFileUrl)
+            # shutil.move(viewFileUrl, newfile_path)
+        except Exception as e:
+            print('彻底删除失败', e)
+            return '彻底删除失败' + str(e)
+
+    print('彻底删除成功')
+    # 返回垃圾箱文件列表
+    for root, dirs, files in os.walk(urls['projectAddress'] + '/垃圾箱' + '/' + viewsName):
+        return files
 
 
 # 获取项目对应的当前数据源的所有列名和所有视图（）
