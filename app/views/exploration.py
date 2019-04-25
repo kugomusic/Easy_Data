@@ -226,7 +226,7 @@ def deleteViewData():
     mkdir(urls['projectAddress'] + '/垃圾箱')
     mkdir(urls['projectAddress'] + '/垃圾箱' + '/' + viewsName)
     newfile_path = urls['projectAddress'] + '/垃圾箱' + '/' + viewsName + '/' + jsonFileName
-    # 复制文件
+    # 移动文件
     try:
         shutil.move(viewFileUrl, newfile_path)
         print('删除成功')
@@ -234,6 +234,34 @@ def deleteViewData():
     except Exception as e:
         print('删除失败', e)
         return '删除失败' + str(e)
+
+
+# 恢复已删除的视图
+@app.route("/restoreViewData", methods=['POST'])
+def restoreViewData():
+    viewsName = request.form.get("viewsName")
+    projectName = request.form.get("projectName")
+    jsonFileName = request.form.get("jsonFileName")
+    print('viewsName: {}, projectName: {}'.format(viewsName, projectName))
+    urls = getProjectCurrentDataUrl(projectName)
+    if (viewsName == 'FullTableStatisticsView'):
+        viewsName = '全表统计'
+    elif (viewsName == 'FrequencyStatisticsView'):
+        viewsName = '频次统计'
+    elif (viewsName == 'CorrelationCoefficientView'):
+        viewsName = '相关系数'
+    elif (viewsName == 'ScatterPlot'):
+        viewsName = '散点图'
+    viewFileUrl = urls['projectAddress'] + '/垃圾箱' + '/' + viewsName + '/' + jsonFileName
+    newfile_path = urls['projectAddress']+'/'+viewsName+'/' + jsonFileName
+    # 移动文件
+    try:
+        shutil.move(viewFileUrl, newfile_path)
+        print('恢复成功')
+        return getfileListFun(viewsName, projectName)
+    except Exception as e:
+        print('恢复失败', e)
+        return '恢复失败' + str(e)
 
 
 # 获取项目对应的当前数据源的所有列名和所有视图（）
