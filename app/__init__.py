@@ -12,4 +12,5 @@ app.config.from_object('config')
 db = SQLAlchemy(app)
 #
 from app.views import mysql, exploration, process,process2, operateFlow, featureEngineering
-from app import test
+
+# from app import test

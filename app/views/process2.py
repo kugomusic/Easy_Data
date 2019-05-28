@@ -25,6 +25,7 @@ class MyResponse(Response):
         return super(Response, cls).force_type(response, environ)
 app.response_class = MyResponse
 
+# 填充空值
 @app.route("/fillNullValue", methods=['GET','POST'])
 def fillNullValue():
     projectName = request.form.get('projectName')

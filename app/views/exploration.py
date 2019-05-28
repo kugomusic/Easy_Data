@@ -223,18 +223,19 @@ def deleteViewData():
     elif (viewsName == 'ScatterPlot'):
         viewsName = '散点图'
     file_path = urls['projectAddress']+'/'+viewsName+'/' + fileName + '.json'
+    print('删除文件的路径：',file_path)
     # 删除文件
     try:
         if(os.path.exists(file_path)):
-            shutil.rmtree(file_path)
+            os.remove(file_path)
             print('删除成功')
-            return '删除成功'
+            return getfileListFun(viewsName, projectName)
         else:
             print('文件不存在')
             return '文件不存在'
     except Exception as e:
-        print('保存失败', e)
-        return '保存失败' + str(e)
+        print('删除失败', e)
+        return '删除失败' + str(e)
 '''
 # 删除视图
 @app.route("/deleteViewData", methods=['POST'])

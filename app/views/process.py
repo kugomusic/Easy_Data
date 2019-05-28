@@ -126,7 +126,7 @@ def filterCore(spark, df, condition):
     return sqlDF
 
 
-# 排序页面路由
+# 排序 页面路由
 @app.route("/sort", methods=['GET', 'POST'])
 def sort():
     # 接受请求传参，例如: {"projectName":"订单分析","columnName":"利润","sortType":"降序"}
@@ -452,7 +452,7 @@ def columnsMergeCore(requestStr):
     return df
 
 
-# 数据列替换页面路由
+# 数据列替换 页面路由
 @app.route("/replace", methods=['GET', 'POST'])
 def replace():
     # 接受请求传参，例如: {"project":"订单分析","columnName":"客户ID","sourceCharacter":"0","targetCharacter":"Q"}
