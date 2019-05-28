@@ -125,61 +125,88 @@ def filterCore(spark, df, condition):
 
     return sqlDF
 
-
 # 排序 页面路由
 @app.route("/sort", methods=['GET', 'POST'])
 def sort():
-    # 接受请求传参，例如: {"projectName":"订单分析","columnName":"利润","sortType":"降序"}
+    # 接受请求传参，例如: {"userId":"1","projectName":"订单分析","columnName":"利润","sortType":"降序"}
     if request.method == 'GET':
-        requestStr = request.args.get("requestStr")
+        return "请使用post请求"
     else:
         requestStr = request.form.get("requestStr")
-
-    # 执行主函数，获取df(spark格式)
-    df = sortCore(requestStr)
-    if df == "error_projectUrl":
-        return "error: 项目名或项目路径有误"
-    elif df == "error_columnInputNumSingle":
-        return "error: 只能选择一列进行排序"
-
-    # 处理后的数据写入文件（借助pandas进行存储、返回）
-    df_pandas = df.toPandas()
-    df_pandas.to_csv(save_dir, header=True)
-
-    print(df_pandas)
-
-    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
-
-
-# 排序主函数，函数功能包括解析参数、排序；返回df(spark格式)
-def sortCore(requestStr):
+    print(requestStr)
     # 对参数格式进行转化：json->字典，并进一步进行解析
     requestDict = json.loads(requestStr)
-    projectName = requestDict['projectName']
-    columnName = requestDict['columnName']
+    projectName = requestDict['projectName']  #项目名称
+    userId = requestDict['userId']            #用户ID
+    columnName = requestDict['columnName']    #排序的列名（只能是一列）
     # 只能输入一列，否则报错
     if len(columnName.split(",")) != 1:
-        return "error_columnInputNumSingle"
+        return "error: 只能选择一列进行排序"
     # sortType默认为升序，若用户指定，以用户指定为准
     try:
-        sortType = requestDict['sortType']
+        sortType = requestDict['sortType']    #排序类型（升序、降序）
+        if sortType == "":
+            sortType = "升序"
     except:
         sortType = "升序"
 
     # spark会话
-    spark = SparkSession \
+    ss = SparkSession \
         .builder \
         .master("local") \
         .config("spark.some.config.option", "some-value") \
         .getOrCreate()
 
+    # 执行主函数，获取df(spark格式)
+    df = sortCore(ss, projectName, sortType, columnName)
+    if df == "error_projectUrl":
+        return "error: 项目名或项目路径有误"
+
+    # 处理后的数据写入文件（借助pandas进行存储、返回）
+    df_pandas = df.toPandas()
+    df_pandas.to_csv(save_dir, header=True)
+
+    # 追加处理流程记录
+    operateParameter = {}
+    operateParameter['type'] = '2'
+    operateParameter['operate'] = requestStr
+    addProcessingFlow(projectName, userId, operateParameter)
+    print(df_pandas)
+
+    # 返回前50条数据
+    data2 = df.limit(50).toJSON().collect()
+    print(data2)
+    data3 = ",".join(data2)
+    print(data3)
+    data4 = '[' + data3 + ']'
+    print(data4)
+    return jsonify({'length': df.count(), 'data': json.loads(data4)})
+
+# 排序 页面路由
+@app.route("/jsontostrTest", methods=['GET', 'POST'])
+def jsontostrTest():
+    req = {}
+    parameter = {}
+    parameter["userId"] = "1"
+    parameter["projectName"] = "特征工程测试项目"
+    parameter["columnName"] = "利润"
+    parameter["sortType"] = "升序"
+
+    req["methods"] = "POST"
+    req["url"] = "http://10.108.211.130:8993/sort"
+    req["parameter"] = json.dumps(parameter, ensure_ascii=False)
+    req["result"] = {"data":[],"length": 35}
+    # print(json.dumps(parameter))
+    return json.dumps(parameter, ensure_ascii=False)
+
+# 排序主函数，函数功能包括解析参数、排序；返回df(spark格式)
+def sortCore(ss,projectName,sortType,columnName):
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
     if urls == 'error':
         return 'error_projectUrl'                                 # 错误类型：项目名或项目路径有误
     fileUrl = urls['fileUrl']
-    df = spark.read.csv(fileUrl, header=True, inferSchema=True)
-
+    df = ss.read.csv(fileUrl, header=True, inferSchema=True)
     # 排序
     if sortType == "降序":
         print("按降序排列")
@@ -187,53 +214,26 @@ def sortCore(requestStr):
     else:
         print("按升序排列")
         df = df.sort(columnName)
-
-    #追加处理流程记录
-    operateParameter = {}
-    operateParameter['type'] = '2'
-    operateParameter['operate'] = requestStr
-    addProcessingFlow(projectName, "admin", operateParameter)
-
     return df
 
 
 # 按列拆分页面路由
 @app.route("/columnSplit", methods=['GET', 'POST'])
 def columnSplit():
-    # 接受请求传参，例如: {"project":"订单分析","columnName":"订购日期","newColumnNames":["年","月","日"]}
+    # 接受请求传参，例如: {"userId":"1","project":"订单分析","columnName":"订购日期","newColumnNames":["年","月","日"]}
     if request.method == 'GET':
-        requestStr = request.args.get("requestStr")
+        return "请使用post请求"
     else:
         requestStr = request.form.get("requestStr")
 
-    # 执行主函数，获取df(spark格式)
-    df = columnSplitCore(requestStr)
-    if df == "error_projectUrl":
-        return "error: 项目名或项目路径有误"
-    elif df == "error_columnInputNumSingle":
-        return "error: 只能选择一列进行拆分"
-    elif df == "error_splitSymbol":
-        return "error: 您指定的列中无可供拆分的符号"
-    elif df == "error_splitNum":
-        return "error：您指定的拆分列数与目标列不匹配，请重新输入"
-
-    # 处理后的数据写入文件（借助pandas进行存储、返回）
-    df_pandas = df.toPandas()
-    df_pandas.to_csv(save_dir, header=True)
-
-    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
-
-
-# 按列拆分主函数，函数功能包括解析参数、拆分；返回df(spark格式)
-# 自动识别拆分目标列中的符号，如：2019/03/25中的"/"
-def columnSplitCore(requestStr):
     # 对参数格式进行转化：json->字典，并进一步进行解析
     requestDict = json.loads(requestStr)
+    userId = requestDict['userId']           # 用户ID
     projectName = requestDict['projectName']
     columnName = requestDict['columnName']
     # 只能输入一列，否则报错
     if len(columnName.split(",")) != 1:
-        return "error_columnInputNumSingle"
+        return "error: 只能选择一列进行拆分"
     # 获取拆分出的新列的列名，若未指定，暂时存储为空列表，后续根据拆分数填充成为[拆分列1,拆分列2,拆分列3,...]
     try:
         newColumnNames = requestDict['newColumnNames']
@@ -247,14 +247,38 @@ def columnSplitCore(requestStr):
         .config("spark.some.config.option", "some-value") \
         .getOrCreate()
 
-    sc = spark.sparkContext
+    # 执行主函数，获取df(spark格式)
+    df = columnSplitCore(requestStr)
+    if df == "error_projectUrl":
+        return "error: 项目名或项目路径有误"
+    elif df == "error_splitSymbol":
+        return "error: 您指定的列中无可供拆分的符号"
+    elif df == "error_splitNum":
+        return "error：您指定的拆分列数与目标列不匹配，请重新输入"
 
+    # 处理后的数据写入文件（借助pandas进行存储、返回）
+    df_pandas = df.toPandas()
+    df_pandas.to_csv(save_dir, header=True)
+
+    #追加处理流程记录
+    operateParameter = {}
+    operateParameter['type'] = '4.1'
+    operateParameter['operate'] = requestStr
+    addProcessingFlow(projectName, userId, operateParameter)
+
+    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
+
+
+# 按列拆分主函数，函数功能包括解析参数、拆分；返回df(spark格式)
+# 自动识别拆分目标列中的符号，如：2019/03/25中的"/"
+def columnSplitCore(ss,projectName,columnName,newColumnNames):
+    sc = ss.sparkContext
     # 解析项目路径，读取csv
     urls = getProjectCurrentDataUrl(projectName)
     if urls == 'error':
         return 'error_projectUrl'                                 # 错误类型：项目名或项目路径有误
     fileUrl = urls['fileUrl']
-    df = spark.read.csv(fileUrl, header=True, inferSchema=True)
+    df = ss.read.csv(fileUrl, header=True, inferSchema=True)
 
     # 拆分
     first_row = df.first()
@@ -282,13 +306,6 @@ def columnSplitCore(requestStr):
         df_split = df_split.withColumn(name, df_split["splitColumn"].getItem(index))
     df = df_split.drop("splitColumn")
     df.show()
-
-    #追加处理流程记录
-    operateParameter = {}
-    operateParameter['type'] = '4.1'
-    operateParameter['operate'] = requestStr
-    addProcessingFlow(projectName, "admin", operateParameter)
-
     return df
 
 
