@@ -1,17 +1,8 @@
 # -*- coding: UTF-8 -*-
-from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, abort
+from flask import request, jsonify, Response
 from flask.json import jsonify
 from app import app
-import json
-import os
-import time
-from app.utils import mkdir, getProjectCurrentDataUrl, is_number, addProcessingFlow
-import app.utils as apus
-import pandas as pd
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import split, explode, concat_ws, regexp_replace
-import random
-import string
+from app.utils import *
 from app.constFile import const
 
 save_dir = const.SAVEDIR
@@ -31,34 +22,23 @@ def fillNullValue():
     projectName = request.form.get('projectName')
     userId = request.form.get('userId')
     parameterStr = request.form.get('parameter')
-    spark = SparkSession \
-        .builder \
-        .master("local") \
-        .config("spark.some.config.option", "some-value") \
-        .getOrCreate()
+    functionName = "fillNullValue"
+    print(functionName, projectName, userId, parameterStr)
+    ss = getSparkSession(userId, functionName)
     # 解析参数格式
     parameter = fillNullValueParameter(projectName, parameterStr)
+    # 读取数据
     fileUrl = parameter['fileUrl']
-    condition = parameter['condition']
-    df = spark.read.format("CSV").option("header", "true").load(fileUrl)
+    df = ss.read.format("CSV").option("header", "true").load(fileUrl)
     # 过滤函数
-    sqlDF = fillNullValueCore(spark, df, condition)
-    sqlDF.show()
+    condition = parameter['condition']
+    sqlDF = fillNullValueCore(ss, df, condition)
     # 处理后的数据写入文件
     sqlDF.toPandas().to_csv(save_dir, header=True)
     #追加处理流程记录
-    operateParameter = {}
-    operateParameter['type'] = '3'
-    operateParameter['operate'] = parameterStr
-    addProcessingFlow(projectName, userId, operateParameter)
+    addProcessingFlow(projectName, userId, '1007', parameterStr)
     # 返回前50条数据
-    data2 = sqlDF.limit(50).toJSON().collect()
-    print(data2)
-    data3 = ",".join(data2)
-    print(data3)
-    data4 = '['+data3+']'
-    print(data4)
-    return jsonify({'length': sqlDF.count(), 'data': json.loads(data4)})
+    return jsonify({'length': sqlDF.count(), 'data': dfToJson(sqlDF, 50)})
 
 def fillNullValueParameter(projectName, parameterStr):
     try:
@@ -102,34 +82,23 @@ def columnMap():
     projectName = request.form.get('projectName')
     userId = request.form.get('userId')
     parameterStr = request.form.get('parameter')
-    spark = SparkSession \
-        .builder \
-        .master("local") \
-        .config("spark.some.config.option", "some-value") \
-        .getOrCreate()
+    functionName = "columnMap"
+    print(functionName, projectName, userId, parameterStr)
+    # 获取sparkSession
+    ss = getSparkSession(userId, functionName)
     # 解析参数格式
     parameter = columnMapParameter(projectName, parameterStr)
     fileUrl = parameter['fileUrl']
     condition = parameter['condition']
-    df = spark.read.format("CSV").option("header", "true").load(fileUrl)
+    df = ss.read.format("CSV").option("header", "true").load(fileUrl)
     # 过滤函数
-    sqlDF = columnMapCore(spark, df, condition)
-    sqlDF.show()
+    sqlDF = columnMapCore(ss, df, condition)
     # 处理后的数据写入文件
     sqlDF.toPandas().to_csv(save_dir, header=True)
     #追加处理流程记录
-    operateParameter = {}
-    operateParameter['type'] = '3'
-    operateParameter['operate'] = parameterStr
-    addProcessingFlow(projectName, userId, operateParameter)
+    addProcessingFlow(projectName, userId, '1008', parameterStr)
     # 返回前50条数据
-    data2 = sqlDF.limit(50).toJSON().collect()
-    print(data2)
-    data3 = ",".join(data2)
-    print(data3)
-    data4 = '['+data3+']'
-    print(data4)
-    return jsonify({'length': sqlDF.count(), 'data': json.loads(data4)})
+    return jsonify({'length': sqlDF.count(), 'data': dfToJson(sqlDF, 50)})
 
 def columnMapParameter(projectName, parameterStr):
     try:

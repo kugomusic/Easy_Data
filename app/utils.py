@@ -1,7 +1,23 @@
 # -*- coding: UTF-8 -*-
-from app.models.mysql import DataSource, Project, initdb, ProcessFlow
+from app.models.mysql import Project, ProcessFlow
 import os, json
 from app import db
+from pyspark.sql import SparkSession
+
+# 获取一个新的SparkSession
+def getSparkSession(userId, computationName):
+    ss = SparkSession \
+        .builder \
+        .master("local") \
+        .config("spark.some.config.option", "some-value") \
+        .getOrCreate()
+    return ss
+# 返回前nums条数据（json格式）
+def dfToJson(df, nums):
+    data_1 = df.limit(nums).toJSON().collect()
+    data_2 = ",".join(data_1)
+    data_3 = '[' + data_2 + ']'
+    return json.loads(data_3)
 
 # 获取处理流
 def getProcessFlowByProjectId(projectId):
@@ -14,9 +30,12 @@ def getProcessFlowByProjectId(projectId):
         return "error"
 
 # 追加处理流程记录
-def addProcessingFlow(projectName, userId, operate):
+def addProcessingFlow(projectName, userId, operateType, operateParameter):
     try:
-        print(projectName, ' ', userId, ' ', operate)
+        operate = {}
+        operate['type'] = operateType
+        operate['operate'] = operateParameter
+        print("追加处理流程", projectName, userId, operate)
         pflow = db.session.query(ProcessFlow.id,ProcessFlow.project_id,ProcessFlow.operates). \
             join(Project, Project.id == ProcessFlow.project_id). \
             filter(Project.project_name == projectName). \
@@ -74,6 +93,15 @@ def getProjectCurrentDataUrl(projectName):
             return {'fileUrl': 'file://' + ProjectAddress+'/'+filename, 'projectAddress': ProjectAddress}
     except:
         return "error"
+# 获取项目的正在操作的文件数据
+def getProjectCurrentData(ss, projectName):
+    # 解析项目路径，读取csv
+    urls = getProjectCurrentDataUrl(projectName)
+    if urls == 'error':
+        return "error: 项目名或项目路径有误"  # 错误类型：项目名或项目路径有误
+    fileUrl = urls['fileUrl']
+    df = ss.read.csv(fileUrl, header=True, inferSchema=True)
+    return df
 
 #根据指定路径创建文件夹
 def mkdir(path):

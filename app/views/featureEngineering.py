@@ -25,36 +25,9 @@ def quantileDiscretization():
     else:
         requestStr = request.form.get("requestStr")
 
-    # 执行主函数，获取df(spark格式)
-    df = quantileDiscretizationCore(requestStr)
-    if df == "error_projectUrl":
-        return "error: 项目名或项目路径有误"
-    elif df == "error_columnInputNumSingle":
-        return "error: 只能选择一列进行分位数离散化"
-    elif df == "error_numerical":
-        return "error: 只能离散化数值型的列，请检查列名输入是否有误"
-
-    # 处理后的数据写入文件（借助pandas进行存储、返回）
-    df_pandas = df.toPandas()
-    df_pandas.to_csv(save_dir, header=True)
-
-    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
-
-
-# 分位数离散化主函数, 将某列连续型数值进行分箱，加入新列；返回df(spark格式)
-def quantileDiscretizationCore(requestStr):
     # 对参数格式进行转化：json->字典，并进一步进行解析
     requestDict = json.loads(requestStr)
     projectName = requestDict['projectName']
-    columnName = requestDict['columnName']
-    # 只能输入一列，否则报错
-    if len(columnName.split(",")) != 1:
-        return "error_columnInputNumSingle"
-    # 新列的列名默认为columnName + "(分位数离散化)"，若用户指定，以用户指定为准
-    try:
-        newColumnName = requestDict['newColumnName']
-    except:
-        newColumnName = columnName + "(分位数离散化)"
 
     # spark会话
     spark = SparkSession \
@@ -70,6 +43,42 @@ def quantileDiscretizationCore(requestStr):
     fileUrl = urls['fileUrl']
     df = spark.read.csv(fileUrl, header=True, inferSchema=True)
 
+    # 执行主函数，获取df(spark格式)
+    df = quantileDiscretizationCore(requestStr,df)
+    if df == "error_projectUrl":
+        return "error: 项目名或项目路径有误"
+    elif df == "error_columnInputNumSingle":
+        return "error: 只能选择一列进行分位数离散化"
+    elif df == "error_numerical":
+        return "error: 只能离散化数值型的列，请检查列名输入是否有误"
+
+    df.show()
+    # 处理后的数据写入文件（借助pandas进行存储、返回）
+    df_pandas = df.toPandas()
+    df_pandas.to_csv(save_dir, header=True)
+    # 追加处理流程记录
+    operateParameter = {}
+    operateParameter['type'] = '8'
+    operateParameter['operate'] = requestStr
+    addProcessingFlow(projectName, "admin", operateParameter)
+
+    return jsonify({'length': df.count(), 'data': df_pandas.to_json(force_ascii=False)})
+
+
+# 分位数离散化主函数, 将某列连续型数值进行分箱，加入新列；返回df(spark格式)
+def quantileDiscretizationCore(requestStr,df):
+    # 对参数格式进行转化：json->字典，并进一步进行解析
+    requestDict = json.loads(requestStr)
+    columnName = requestDict['columnName']
+    # 只能输入一列，否则报错
+    if len(columnName.split(",")) != 1:
+        return "error_columnInputNumSingle"
+    # 新列的列名默认为columnName + "(分位数离散化)"，若用户指定，以用户指定为准
+    try:
+        newColumnName = requestDict['newColumnName']
+    except:
+        newColumnName = columnName + "(分位数离散化)"
+
     # 默认分箱数numBuckets为5，若用户指定，以指定为准
     try:
         numBuckets = int(requestDict['numBuckets'])
@@ -84,14 +93,6 @@ def quantileDiscretizationCore(requestStr):
         df = qds.fit(df).transform(df)
     except utils.IllegalArgumentException:
         return "error_numerical"
-
-    df.show()
-
-    # 追加处理流程记录
-    operateParameter = {}
-    operateParameter['type'] = '8'
-    operateParameter['operate'] = requestStr
-    addProcessingFlow(projectName, "admin", operateParameter)
 
     return df
 
