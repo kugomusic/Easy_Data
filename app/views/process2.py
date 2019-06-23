@@ -70,7 +70,9 @@ def fillNullValueParameter(projectName, parameterStr):
     parameter['fileUrl'] = fileUrl
     condition = []
     strList = parameterStr.split(';')
-    for i in range(len(strList)-1):
+    for i in range(len(strList)):
+        if strList[i] == "" or strList[i] == None:
+            continue
         ll = strList[i].split(',', 1)
         con ={}
         con['name'] = ll[0]
@@ -78,9 +80,7 @@ def fillNullValueParameter(projectName, parameterStr):
         condition.append(con)
     parameter['condition'] = condition
     return parameter
-# print(filterCoreParameter('甜点销售数据预处理', '列名一,关系,值,组合关系;列名一,关系,值,'))
-
-from pyspark.sql import functions as func
+# print(fillNullValueParameter('特征工程测试项目', '列名一,填充方法;列名一,填充方法'))
 
 def fillNullValueCore(spark, df, condition):
     # val fillColValues = Map("StockCode" -> 5, "Description" -> "No value")
@@ -141,13 +141,21 @@ def columnMapParameter(projectName, parameterStr):
     parameter['fileUrl'] = fileUrl
     condition = []
     strList = parameterStr.split(';')
-    for i in range(len(strList) - 1):
-        ll = strList[i].split(',', 3)
+    for i in range(len(strList)):
+        if strList[i] == "" or strList[i] == None:
+            continue
+        ll = strList[i].split(',', 7)
         con ={}
-        con['name'] = ll[0]
-        con['operate'] = ll[1]
-        con['value'] = ll[2]
-        con['newName'] = ll[3]
+        con['name1'] = ll[0]
+        con['operate1'] = ll[1]
+        con['value1'] = ll[2]
+
+        con['operate'] = ll[3]
+        con['name2'] = ll[4]
+        con['operate2'] = ll[5]
+        con['value2'] = ll[6]
+
+        con['newName'] = ll[7]
         condition.append(con)
     parameter['condition'] = condition
     return parameter
@@ -158,13 +166,35 @@ def columnMapCore(spark, df, condition):
     # val fillColValues = Map("StockCode" -> 5, "Description" -> "No value")
     # df.na.fill(fillColValues)
     for i in condition:
-        name = i['name']
-        if(i['operate'] == '+'):
-            df = df.withColumn(i['newName'], df[name] + i['value'])
-        elif(i['operate'] == '-'):
-            df = df.withColumn(i['newName'], df[name] - i['value'])
-        elif (i['operate'] == '*'):
-            df = df.withColumn(i['newName'], df[name] * i['value'])
-        elif (i['operate'] == '/'):
-            df = df.withColumn(i['newName'], df[name] / i['value'])
+        name1 = i['name1']
+        name2 = i['name2']
+        newName = i['newName']
+        if (i['operate1'] == '+'):
+            df = df.withColumn(newName, df[name1] + i['value1'])
+        elif (i['operate1'] == '-'):
+            df = df.withColumn(newName, df[name1] - i['value1'])
+        elif (i['operate1'] == '*'):
+            df = df.withColumn(newName, df[name1] * i['value1'])
+        elif (i['operate1'] == '/'):
+            df = df.withColumn(newName, df[name1] / i['value1'])
+        if(not ((name2 == "") or (name2 == None ))):
+            newName2 = newName+"_2"
+            if (i['operate2'] == '+'):
+                df = df.withColumn(newName2, df[name2] + i['value2'])
+            elif (i['operate2'] == '-'):
+                df = df.withColumn(newName2, df[name2] - i['value2'])
+            elif (i['operate2'] == '*'):
+                df = df.withColumn(newName2, df[name2] * i['value2'])
+            elif (i['operate2'] == '/'):
+                df = df.withColumn(newName2, df[name2] / i['value2'])
+
+            if (i['operate'] == '+'):
+                df = df.withColumn(newName, df[newName] + df[newName2])
+            elif (i['operate'] == '-'):
+                df = df.withColumn(newName, df[newName] - df[newName2])
+            elif (i['operate'] == '*'):
+                df = df.withColumn(newName, df[newName] * df[newName2])
+            elif (i['operate'] == '/'):
+                df = df.withColumn(newName, df[newName] / df[newName2])
+            df = df.drop(newName2)
     return df

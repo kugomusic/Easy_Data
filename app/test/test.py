@@ -62,3 +62,10 @@ def fullTableStatistics2():
     # print(res)
 
 # fullTableStatistics2()
+
+str1 = "利润,+,100,+,数量,*,0.0001,newCol"
+print(len(str1.split(';'))) #1
+str1 = "利润,均值填充;数量,最大值填充"
+print(len(str1.split(';'))) #2
+str1 = "利润,均值填充;数量,最大值填充;"
+print(len(str1.split(';'))) #3

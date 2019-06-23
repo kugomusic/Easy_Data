@@ -89,6 +89,8 @@ def filterCoreParameter(projectName, parameterStr):
     condition = []
     strList = parameterStr[0:len(parameterStr)-1].split(';')
     for i in range(len(strList) - 1):
+        if strList[i] == "" or strList[i] == None:
+            continue
         ll = strList[i].split(',', 3)
         con ={}
         con['name'] = ll[0]
