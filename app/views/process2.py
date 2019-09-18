@@ -19,26 +19,39 @@ app.response_class = MyResponse
 # 填充空值
 @app.route("/fillNullValue", methods=['GET','POST'])
 def fillNullValue():
-    projectName = request.form.get('projectName')
-    userId = request.form.get('userId')
-    parameterStr = request.form.get('parameter')
+    # 接受请求传参，例如: {"project":"订单分析","columnName":"客户ID","sourceCharacter":"0","targetCharacter":"Q"}
+    if request.method == 'GET':
+        requestStr = request.args.get("requestStr")
+    else:
+        requestStr = request.form.get("requestStr")
+
+    # 对参数格式进行转化：json->字典，并进一步进行解析
+    requestDict = json.loads(requestStr)
+    projectName = requestDict['projectName']
+    userId = requestDict['userId']
+    parameter = requestDict['parameter']
     functionName = "fillNullValue"
-    print(functionName, projectName, userId, parameterStr)
+    state = True
+    reason = ""
+    print(functionName, projectName, userId, requestDict)
     ss = getSparkSession(userId, functionName)
-    # 解析参数格式
-    parameter = fillNullValueParameter(projectName, parameterStr)
-    # 读取数据
-    fileUrl = parameter['fileUrl']
-    df = ss.read.format("CSV").option("header", "true").load(fileUrl)
+    # 解析项目路径，读取csv
+    df = getProjectCurrentData(ss, projectName)
+    if df == "error: 项目名或项目路径有误":
+        state = False
+        reason = df
+        return returnDataModel(df, state, reason)
     # 过滤函数
-    condition = parameter['condition']
-    sqlDF = fillNullValueCore(ss, df, condition)
+    sqlDF = fillNullValueCore(ss, df, parameter)
     # 处理后的数据写入文件
     sqlDF.toPandas().to_csv(save_dir, header=True)
     #追加处理流程记录
-    addProcessingFlow(projectName, userId, '1007', parameterStr)
+    resultStr = addProcessingFlow(projectName, userId, '1007', requestStr)
+    if resultStr != "":
+        state = False
+        reason = resultStr
     # 返回前50条数据
-    return jsonify({'length': sqlDF.count(), 'data': dfToJson(sqlDF, 50)})
+    return returnDataModel(df, state, reason)
 
 def fillNullValueParameter(projectName, parameterStr):
     try:
@@ -67,38 +80,51 @@ def fillNullValueCore(spark, df, condition):
     # df.na.fill(fillColValues)
     for i in condition:
         if(i['operate'] == '均值填充'):
-            mean_item = df.select(func.mean(i['name'])).collect()[0][0]
-            df = df.na.fill({i['name']: mean_item})
+            mean_item = df.select(func.mean(i['colName'])).collect()[0][0]
+            df = df.na.fill({i['colName']: mean_item})
         elif(i['operate'] == '最大值填充'):
-            mean_item = df.select(func.max(i['name'])).collect()[0][0]
-            df = df.na.fill({i['name']: mean_item})
+            mean_item = df.select(func.max(i['colName'])).collect()[0][0]
+            df = df.na.fill({i['colName']: mean_item})
         elif (i['operate'] == '最小值填充'):
-            mean_item = df.select(func.min(i['name'])).collect()[0][0]
-            df = df.na.fill({i['name']: mean_item})
+            mean_item = df.select(func.min(i['colName'])).collect()[0][0]
+            df = df.na.fill({i['colName']: mean_item})
     return df
 
 @app.route("/columnMap", methods=['GET','POST'])
 def columnMap():
-    projectName = request.form.get('projectName')
-    userId = request.form.get('userId')
-    parameterStr = request.form.get('parameter')
+
+    if request.method == 'GET':
+        requestStr = request.args.get("requestStr")
+    else:
+        requestStr = request.form.get("requestStr")
+    # 对参数格式进行转化：json->字典，并进一步进行解析
+    requestDict = json.loads(requestStr)
+    userId = requestDict['userId']  # 用户ID
+    projectName = requestDict['projectName']
+    parameter = requestDict['parameter']
     functionName = "columnMap"
-    print(functionName, projectName, userId, parameterStr)
+    state = True
+    reason = ""
+    print(functionName, projectName, userId, requestDict)
     # 获取sparkSession
     ss = getSparkSession(userId, functionName)
-    # 解析参数格式
-    parameter = columnMapParameter(projectName, parameterStr)
-    fileUrl = parameter['fileUrl']
-    condition = parameter['condition']
-    df = ss.read.format("CSV").option("header", "true").load(fileUrl)
+    # 解析项目路径，读取csv
+    df = getProjectCurrentData(ss, projectName)
+    if df == "error: 项目名或项目路径有误":
+        state = False
+        reason = df
+        return returnDataModel(df, state, reason)
     # 过滤函数
-    sqlDF = columnMapCore(ss, df, condition)
+    sqlDF = columnMapCore(ss, df, parameter)
     # 处理后的数据写入文件
     sqlDF.toPandas().to_csv(save_dir, header=True)
     #追加处理流程记录
-    addProcessingFlow(projectName, userId, '1008', parameterStr)
+    resultStr = addProcessingFlow(projectName, userId, '1008', requestStr)
+    if resultStr != "":
+        state = False
+        reason = resultStr
     # 返回前50条数据
-    return jsonify({'length': sqlDF.count(), 'data': dfToJson(sqlDF, 50)})
+    return returnDataModel(df, state, reason)
 
 def columnMapParameter(projectName, parameterStr):
     try:
@@ -115,14 +141,14 @@ def columnMapParameter(projectName, parameterStr):
             continue
         ll = strList[i].split(',', 7)
         con ={}
-        con['name1'] = ll[0]
-        con['operate1'] = ll[1]
-        con['value1'] = ll[2]
+        con['colName_1'] = ll[0]
+        con['operate_1'] = ll[1]
+        con['value_1'] = ll[2]
 
         con['operate'] = ll[3]
-        con['name2'] = ll[4]
-        con['operate2'] = ll[5]
-        con['value2'] = ll[6]
+        con['colName_2'] = ll[4]
+        con['operate_2'] = ll[5]
+        con['value_2'] = ll[6]
 
         con['newName'] = ll[7]
         condition.append(con)
@@ -135,27 +161,27 @@ def columnMapCore(spark, df, condition):
     # val fillColValues = Map("StockCode" -> 5, "Description" -> "No value")
     # df.na.fill(fillColValues)
     for i in condition:
-        name1 = i['name1']
-        name2 = i['name2']
+        name1 = i['colName_1']
+        name2 = i['colName_2']
         newName = i['newName']
-        if (i['operate1'] == '+'):
-            df = df.withColumn(newName, df[name1] + i['value1'])
-        elif (i['operate1'] == '-'):
-            df = df.withColumn(newName, df[name1] - i['value1'])
-        elif (i['operate1'] == '*'):
-            df = df.withColumn(newName, df[name1] * i['value1'])
-        elif (i['operate1'] == '/'):
-            df = df.withColumn(newName, df[name1] / i['value1'])
+        if (i['operate_1'] == '+'):
+            df = df.withColumn(newName, df[name1] + i['value_1'])
+        elif (i['operate_1'] == '-'):
+            df = df.withColumn(newName, df[name1] - i['value_1'])
+        elif (i['operate_1'] == '*'):
+            df = df.withColumn(newName, df[name1] * i['value_1'])
+        elif (i['operate_1'] == '/'):
+            df = df.withColumn(newName, df[name1] / i['value1_'])
         if(not ((name2 == "") or (name2 == None ))):
             newName2 = newName+"_2"
-            if (i['operate2'] == '+'):
-                df = df.withColumn(newName2, df[name2] + i['value2'])
-            elif (i['operate2'] == '-'):
-                df = df.withColumn(newName2, df[name2] - i['value2'])
-            elif (i['operate2'] == '*'):
-                df = df.withColumn(newName2, df[name2] * i['value2'])
-            elif (i['operate2'] == '/'):
-                df = df.withColumn(newName2, df[name2] / i['value2'])
+            if (i['operate_2'] == '+'):
+                df = df.withColumn(newName2, df[name2] + i['value_2'])
+            elif (i['operate_2'] == '-'):
+                df = df.withColumn(newName2, df[name2] - i['value_2'])
+            elif (i['operate_2'] == '*'):
+                df = df.withColumn(newName2, df[name2] * i['value_2'])
+            elif (i['operate_2'] == '/'):
+                df = df.withColumn(newName2, df[name2] / i['value_2'])
 
             if (i['operate'] == '+'):
                 df = df.withColumn(newName, df[newName] + df[newName2])

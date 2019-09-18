@@ -14,6 +14,7 @@ import pandas as pd
 import os
 from app.utils import mkdir, getProjectCurrentDataUrl, getProjectByNameAndUserId
 from app.constFile import const
+from app.models.serverNameMap import ServerNameMap
 
 #解决 list, dict 不能返回的问题
 class MyResponse(Response):
@@ -82,6 +83,28 @@ def getProjectList():
     result = []
     for i in DSs:
         result.append({"id": i.id, "name": i.project_name})
+    return result
+
+#获取项目列表
+@app.route('/getProcessFlowByProjectId', methods=['GET','POST'])
+def getProcessFlowByProjectId():
+    if request.method == 'GET':
+        projectId = request.args.get("projectId")
+    else:
+        projectId = request.form.get("projectId")
+    DSs = ProcessFlow.query.filter(ProcessFlow.project_id == projectId).one()
+    result = {}
+    result['id'] = DSs.id
+    result['linkDataArray'] = json.loads(DSs.links)
+    operates = json.loads(DSs.operates)
+    for operate in operates:
+        operate['operateId'] = operate['type']
+        operate['operate'] = json.loads(operate['operate'])
+        operate['text'] = ServerNameMap.operateIdToNameMap[operate['operateId']]
+        operate['type'] = ServerNameMap.operateIdToTypeMap[operate['operateId']]
+        operate['color'] = ServerNameMap.typeToColorMap[operate['type']]
+    result['nodeDataArray'] = operates
+    result['class'] = 'go.GraphLinksModel'
     return result
 
 #原始数据预览

@@ -45,4 +45,6 @@ class ProcessFlow(db.Model):
     __tablename__ = 'process_flow'
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.String(64), unique=True, index=True)
-    operates = db.Column(db.String(3000), unique=True, index=True)
+    operates = db.Column(db.String(13000))
+    cur_ope_id = db.Column(db.String(128))
+    links = db.Column(db.String(5000))

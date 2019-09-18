@@ -3,6 +3,17 @@ from app.models.mysql import Project, ProcessFlow
 import os, json
 from app import db
 from pyspark.sql import SparkSession
+import uuid
+import traceback
+from flask.json import jsonify
+
+# 返回数据
+def returnDataModel(df, state, reason):
+    if state:
+        return jsonify({'state': state, 'reason': reason, 'length': df.count(), 'data': dfToJson(df, 50)})
+    else:
+        return jsonify({'state': state, 'reason': reason, 'length': 0, 'data': {}})
+
 
 # 获取一个新的SparkSession
 def getSparkSession(userId, computationName):
@@ -34,27 +45,49 @@ def addProcessingFlow(projectName, userId, operateType, operateParameter):
     try:
         operate = {}
         operate['type'] = operateType
+        operate['key'] = str(uuid.uuid1())
+        print(operate['key'])
         operate['operate'] = operateParameter
         print("追加处理流程", projectName, userId, operate)
-        pflow = db.session.query(ProcessFlow.id,ProcessFlow.project_id,ProcessFlow.operates). \
+        pflow = db.session.query(ProcessFlow.id, ProcessFlow.project_id, ProcessFlow.operates, ProcessFlow.cur_ope_id, ProcessFlow.links). \
             join(Project, Project.id == ProcessFlow.project_id). \
             filter(Project.project_name == projectName). \
             filter(Project.user_id == userId).\
             first()
-        # print(pflow)
-        operates = json.loads(pflow[2])
+        # 修改 operates
+        # print(len(pflow))
+        if not (pflow[2]==None or pflow[2] == ""):
+            operates = json.loads(pflow[2])
+        else:
+            operates = []
         operates.append(operate)
-        # print('operates=', operates)
         operateStr = json.dumps(operates, ensure_ascii=False)
-        # print('operateStr=', operateStr)
+        # 修改 links
+        if not (pflow[3] == None or pflow[3] == ""):
+            link = {}
+            link['from'] = pflow[3]
+            link['to'] = operate['key']
+            if not (pflow[4] == None or pflow[4] == ""):
+                links = json.loads(pflow[4])
+            else:
+                links = []
+            links.append(link)
+            linkStr = json.dumps(links, ensure_ascii=False)
+        else:
+            linkStr = pflow[4]
         filters = {
             ProcessFlow.id == pflow[0],
         }
         result = ProcessFlow.query.filter(*filters).first()
         result.operates = operateStr
+        result.links = linkStr
+        result.cur_ope_id = operate['key']
         db.session.commit()
-    except:
-        return "error"
+        return ""
+    except Exception:
+        print('traceback.format_exc():\n%s' % traceback.format_exc())
+        print("追加数据流程出错")
+        return "追加数据流程出错"
 # addProcessingFlow('甜点销售数据预处理',1,{'type':'1','operate':'列名一,关系,值,组合关系;列名一,关系,值,'})
 
 # 获取项目
