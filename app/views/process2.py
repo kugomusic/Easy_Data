@@ -1,23 +1,27 @@
 # -*- coding: UTF-8 -*-
 from flask import request, jsonify, Response
-from flask.json import jsonify
 from app import app
 from app.utils import *
+from app.enmus.EnumConst import operatorType
 from app.constFile import const
 
 save_dir = const.SAVEDIR
 
-#解决 list, dict 不能返回的问题
+
+# 解决 list, dict 不能返回的问题
 class MyResponse(Response):
     @classmethod
     def force_type(cls, response, environ=None):
         if isinstance(response, (list, dict)):
             response = jsonify(response)
         return super(Response, cls).force_type(response, environ)
+
+
 app.response_class = MyResponse
 
+
 # 填充空值
-@app.route("/fillNullValue", methods=['GET','POST'])
+@app.route("/fillNullValue", methods=['GET', 'POST'])
 def fillNullValue():
     # 接受请求传参，例如: {"project":"订单分析","columnName":"客户ID","sourceCharacter":"0","targetCharacter":"Q"}
     if request.method == 'GET':
@@ -45,13 +49,14 @@ def fillNullValue():
     sqlDF = fillNullValueCore(ss, df, parameter)
     # 处理后的数据写入文件
     sqlDF.toPandas().to_csv(save_dir, header=True)
-    #追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '1007', requestStr)
+    # 追加处理流程记录
+    resultStr = addProcessingFlow(projectName, userId, operatorType.FILLNULLVALUE.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
     # 返回前50条数据
     return returnDataModel(df, state, reason)
+
 
 def fillNullValueParameter(projectName, parameterStr):
     try:
@@ -67,22 +72,24 @@ def fillNullValueParameter(projectName, parameterStr):
         if strList[i] == "" or strList[i] == None:
             continue
         ll = strList[i].split(',', 1)
-        con ={}
+        con = {}
         con['name'] = ll[0]
         con['operate'] = ll[1]
         condition.append(con)
     parameter['condition'] = condition
     return parameter
+
+
 # print(fillNullValueParameter('特征工程测试项目', '列名一,填充方法;列名一,填充方法'))
 
 def fillNullValueCore(spark, df, condition):
     # val fillColValues = Map("StockCode" -> 5, "Description" -> "No value")
     # df.na.fill(fillColValues)
     for i in condition:
-        if(i['operate'] == '均值填充'):
+        if (i['operate'] == '均值填充'):
             mean_item = df.select(func.mean(i['colName'])).collect()[0][0]
             df = df.na.fill({i['colName']: mean_item})
-        elif(i['operate'] == '最大值填充'):
+        elif (i['operate'] == '最大值填充'):
             mean_item = df.select(func.max(i['colName'])).collect()[0][0]
             df = df.na.fill({i['colName']: mean_item})
         elif (i['operate'] == '最小值填充'):
@@ -90,9 +97,9 @@ def fillNullValueCore(spark, df, condition):
             df = df.na.fill({i['colName']: mean_item})
     return df
 
-@app.route("/columnMap", methods=['GET','POST'])
-def columnMap():
 
+@app.route("/columnMap", methods=['GET', 'POST'])
+def columnMap():
     if request.method == 'GET':
         requestStr = request.args.get("requestStr")
     else:
@@ -118,13 +125,14 @@ def columnMap():
     sqlDF = columnMapCore(ss, df, parameter)
     # 处理后的数据写入文件
     sqlDF.toPandas().to_csv(save_dir, header=True)
-    #追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '1008', requestStr)
+    # 追加处理流程记录
+    resultStr = addProcessingFlow(projectName, userId, operatorType.COLUMNMAP.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
     # 返回前50条数据
     return returnDataModel(df, state, reason)
+
 
 def columnMapParameter(projectName, parameterStr):
     try:
@@ -140,7 +148,7 @@ def columnMapParameter(projectName, parameterStr):
         if strList[i] == "" or strList[i] == None:
             continue
         ll = strList[i].split(',', 7)
-        con ={}
+        con = {}
         con['colName_1'] = ll[0]
         con['operate_1'] = ll[1]
         con['value_1'] = ll[2]
@@ -155,7 +163,9 @@ def columnMapParameter(projectName, parameterStr):
     parameter['condition'] = condition
     return parameter
 
+
 from pyspark.sql import functions as func
+
 
 def columnMapCore(spark, df, condition):
     # val fillColValues = Map("StockCode" -> 5, "Description" -> "No value")
@@ -172,8 +182,8 @@ def columnMapCore(spark, df, condition):
             df = df.withColumn(newName, df[name1] * i['value_1'])
         elif (i['operate_1'] == '/'):
             df = df.withColumn(newName, df[name1] / i['value1_'])
-        if(not ((name2 == "") or (name2 == None ))):
-            newName2 = newName+"_2"
+        if (not ((name2 == "") or (name2 == None))):
+            newName2 = newName + "_2"
             if (i['operate_2'] == '+'):
                 df = df.withColumn(newName2, df[name2] + i['value_2'])
             elif (i['operate_2'] == '-'):

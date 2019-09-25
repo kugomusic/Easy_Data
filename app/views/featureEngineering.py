@@ -1,21 +1,16 @@
 # -*- coding: UTF-8 -*-
-from flask import request, jsonify, Response
-from flask.json import jsonify
+from flask import request
 from app import app
-import json
-import os
-import time
-from app.utils import mkdir, getProjectCurrentDataUrl, is_number, addProcessingFlow
-import app.utils as apus
-import pandas as pd
-from pyspark.sql import SparkSession, utils
-from pyspark.sql.functions import split, explode, concat_ws, regexp_replace
+from pyspark.sql import utils
 from pyspark.ml.feature import *
 from app.constFile import const
 from app.utils import *
+from app.enmus.EnumConst import operatorType
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
+
 save_dir = const.SAVEDIR
+
 
 # 分位数离散化页面路由
 @app.route('/quantileDiscretization', methods=['GET', 'POST'])
@@ -45,7 +40,7 @@ def quantileDiscretization():
         return returnDataModel(df, state, reason)
 
     # 执行主函数，获取df(spark格式)
-    df = quantileDiscretizationCore(requestStr,df)
+    df = quantileDiscretizationCore(requestStr, df)
     if df == "error_columnInputNumSingle":
         state = False
         reason = "error: 只能选择一列进行分位数离散化"
@@ -59,7 +54,7 @@ def quantileDiscretization():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '2001', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.QUANTILEDISCRETIZATION.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -134,7 +129,7 @@ def vectorIndexer():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '2002', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.VECTORINDEXER.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -167,6 +162,7 @@ def vectorIndexerCore(requestStr, df):
     indexer = VectorIndexer(maxCategories=maxCategories, inputCol="features", outputCol=newColumnName)
     # 训练
     df = indexer.fit(df).transform(df)
+
     # 转换新列的数据格式
     def do_something(col):
         try:
@@ -176,6 +172,7 @@ def vectorIndexerCore(requestStr, df):
             return floatrow
         except:
             return []
+
     udf_dosth = F.udf(do_something, T.ArrayType(T.FloatType()))
     df = df.withColumn(newColumnName, udf_dosth(df[newColumnName]))
     df = df.drop("features")
@@ -220,7 +217,7 @@ def standardScaler():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '2003', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.STANDARDSCALER.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -248,6 +245,7 @@ def standardScalerCore(requestStr, df):
     standardScaler = StandardScaler(inputCol="features", outputCol=newColumnName)
     # 训练
     df = standardScaler.fit(df).transform(df)
+
     def do_something(col):
         try:
             # print(type(list(col.toArray())))
@@ -263,6 +261,7 @@ def standardScalerCore(requestStr, df):
             # return [1.1]
         except:
             return []
+
     udf_dosth = F.udf(do_something, T.ArrayType(T.FloatType()))
     df = df.withColumn(newColumnName, udf_dosth(df[newColumnName]))
     df = df.drop("features")
@@ -309,7 +308,7 @@ def pca():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '2004', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.PCA.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -347,6 +346,7 @@ def pcaCore(requestStr, df):
     pca = PCA(k=k, inputCol="features", outputCol=newColumnName)
     # 训练
     df = pca.fit(df).transform(df)
+
     # 转换新列的数据格式
     def do_something(col):
         try:
@@ -356,6 +356,7 @@ def pcaCore(requestStr, df):
             return floatrow
         except:
             return []
+
     udf_dosth = F.udf(do_something, T.ArrayType(T.FloatType()))
     df = df.withColumn(newColumnName, udf_dosth(df[newColumnName]))
     df = df.drop("features")
@@ -392,7 +393,7 @@ def stringIndexer():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '2005', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.STRINGINDEXER.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -450,7 +451,7 @@ def oneHotEncoder():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '2006', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.ONEHOTENCODER.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -515,7 +516,7 @@ def polynomialExpansion():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '2007', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.POLYNOMIALEXPANSION.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -545,6 +546,7 @@ def polynomialExpansionCore(requestStr, df):
     px = PolynomialExpansion(inputCol="features", outputCol=newColumnName)
     # 训练
     df = px.transform(df)
+
     # 转换新列的数据格式
     def do_something(col):
         try:
@@ -554,6 +556,7 @@ def polynomialExpansionCore(requestStr, df):
             return floatrow
         except:
             return []
+
     udf_dosth = F.udf(do_something, T.ArrayType(T.FloatType()))
     df = df.withColumn(newColumnName, udf_dosth(df[newColumnName]))
     df = df.drop("features")
@@ -603,12 +606,13 @@ def chiSqSelector():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '2008', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.CHISQSELECTOR.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
     # 返回前50条数据
     return returnDataModel(df, state, reason)
+
 
 # 卡方选择主函数, 在特征向量中选择出那些“优秀”的特征，组成新的、更“精简”的特征向量；返回df(spark格式)
 # 对特征和真实标签label之间进行卡方检验，来判断该特征和真实标签的关联程度，进而确定是否对其进行选择
@@ -653,6 +657,7 @@ def chiSqSelectorCore(requestStr, df):
         df = selector.fit(df).transform(df)
     except utils.IllegalArgumentException:
         return "error_numerical"
+
     # 转换新列的数据格式
     def do_something(col):
         try:
@@ -662,11 +667,12 @@ def chiSqSelectorCore(requestStr, df):
             return floatrow
         except:
             return []
+
     udf_dosth = F.udf(do_something, T.ArrayType(T.FloatType()))
     df = df.withColumn(newColumnName, udf_dosth(df[newColumnName]))
 
     df = df.drop("features")
-    if not(columnName_label == "lable"):
+    if not (columnName_label == "lable"):
         df = df.drop("label")
     # df.show()
     return df

@@ -1,8 +1,10 @@
 # -*- coding: UTF-8 -*-
-from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, abort
+from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, \
+    abort
 from flask.json import jsonify
 from app import app
 from app.utils import *
+from app.enmus.EnumConst import *
 from pyspark.sql.functions import split, explode, concat_ws, regexp_replace
 import random
 import string
@@ -10,8 +12,8 @@ from app.constFile import const
 
 from datetime import datetime
 
-
 save_dir = const.SAVEDIR
+
 
 # 欢迎页面
 @app.route("/", methods=['GET', 'POST'])
@@ -19,7 +21,7 @@ def hello():
     return "<h1 style='color:blueviolet'> HomePage of Easy_Data</h1>"
 
 
-#解决 list, dict 不能返回的问题
+# 解决 list, dict 不能返回的问题
 class MyResponse(Response):
     @classmethod
     def force_type(cls, response, environ=None):
@@ -27,9 +29,11 @@ class MyResponse(Response):
             response = jsonify(response)
         return super(Response, cls).force_type(response, environ)
 
+
 app.response_class = MyResponse
 
-@app.route("/filter", methods=['GET','POST'])
+
+@app.route("/filter", methods=['GET', 'POST'])
 def filterMultiConditions():
     # 接受请求传参，例如: {"userId":"1","projectName":"特征工程测试项目","parameter":[{"colName":"利润", "operate":">", "value":"100", "relation":"AND"},{"colName":"装运方式", "operate":"==", "value":"一级", "relation":""}]}
     # if request.method == 'GET':
@@ -37,7 +41,9 @@ def filterMultiConditions():
     # else:
     #     requestStr = request.form.get("requestStr")
     a = datetime.now()
-    requestDict = {"userId":"1","projectName":"特征工程测试项目","parameter":[{"colName":"利润", "operate":">", "value":"100", "relation":"AND"},{"colName":"装运方式", "operate":"==", "value":"一级", "relation":""}]}
+    requestDict = {"userId": "1", "projectName": "特征工程测试项目",
+                   "parameter": [{"colName": "利润", "operate": ">", "value": "100", "relation": "AND"},
+                                 {"colName": "装运方式", "operate": "==", "value": "一级", "relation": ""}]}
     requestStr = str(requestDict)
     # requestDict = json.loads(requestStr)
     projectName = requestDict['projectName']  # 项目名称
@@ -61,15 +67,16 @@ def filterMultiConditions():
     # sqlDF.write.csv(path='/home/zk/data/test.csv', header=True, sep=",", mode="overwrite")
     # sqlDF.coalesce(1).write.option("header", "true").csv("/home/zk/data/test.csv")
     sqlDF.toPandas().to_csv(save_dir, header=True)
-    #追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '1001', requestStr)
+    # 追加处理流程记录
+    resultStr = addProcessingFlow(projectName, userId, operatorType.FILTER.value, requestStr)
     if resultStr != "":
         state = False
         reason = reason + "  " + resultStr
     # 返回前50条数据
     b = datetime.now()
-    print('-------------------------',b-a)
+    print('-------------------------', b - a)
     return returnDataModel(df, state, reason)
+
 
 def filterCoreParameter(projectName, parameterStr):
     try:
@@ -80,12 +87,12 @@ def filterCoreParameter(projectName, parameterStr):
     parameter = {}
     parameter['fileUrl'] = fileUrl
     condition = []
-    strList = parameterStr[0:len(parameterStr)-1].split(';')
+    strList = parameterStr[0:len(parameterStr) - 1].split(';')
     for i in range(len(strList) - 1):
         if strList[i] == "" or strList[i] == None:
             continue
         ll = strList[i].split(',', 3)
-        con ={}
+        con = {}
         con['name'] = ll[0]
         con['operate'] = ll[1]
         con['value'] = ll[2]
@@ -100,11 +107,13 @@ def filterCoreParameter(projectName, parameterStr):
     condition.append(con)
     parameter['condition'] = condition
     return parameter
+
+
 # print(filterCoreParameter('甜点销售数据预处理', '列名一,关系,值,组合关系;列名一,关系,值,'))
 
 def filterCore(spark, df, condition):
     tableName = ''.join(random.sample(string.ascii_letters + string.digits, 8))
-    sqlStr = 'select * from '+tableName +' where'
+    sqlStr = 'select * from ' + tableName + ' where'
     # types = {}
     # for i in df.dtypes:
     #     types[i[0]] = i[1]
@@ -119,6 +128,7 @@ def filterCore(spark, df, condition):
     sqlDF = spark.sql(sqlStr)
 
     return sqlDF
+
 
 # 排序 页面路由
 @app.route("/sort", methods=['GET', 'POST'])
@@ -135,8 +145,8 @@ def sort():
     requestDict = {"userId": "1", "projectName": "特征工程测试项目", "columnName": "利润", "sortType": "升序"}
     requestStr = str(requestDict)
 
-    projectName = requestDict['projectName']  #项目名称
-    userId = requestDict['userId']            #用户ID
+    projectName = requestDict['projectName']  # 项目名称
+    userId = requestDict['userId']  # 用户ID
     functionName = "sort"
     state = True
     reason = ""
@@ -163,7 +173,7 @@ def sort():
     df_pandas.to_csv(save_dir, header=True)
 
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '1002', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.SORT.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -172,8 +182,9 @@ def sort():
     print('-------------------------', b - a)
     return returnDataModel(df, state, reason)
 
+
 # 排序主函数，函数功能包括解析参数、排序；返回df(spark格式)
-def sortCore(requestDict,df):
+def sortCore(requestDict, df):
     columnName = requestDict['columnName']  # 排序的列名（只能是一列）
     # 只能输入一列，否则报错
     if len(columnName.split(",")) != 1:
@@ -193,6 +204,7 @@ def sortCore(requestDict,df):
         df = df.sort(columnName)
     return df
 
+
 # 排序 请求参数及返回值
 @app.route("/jsontostrTest", methods=['GET', 'POST'])
 def jsontostrTest():
@@ -206,9 +218,10 @@ def jsontostrTest():
     req["methods"] = "POST"
     req["url"] = "http://10.108.211.130:8993/sort"
     req["parameter"] = json.dumps(parameter, ensure_ascii=False)
-    req["result"] = {"data":[],"length": 35}
+    req["result"] = {"data": [], "length": 35}
     # print(json.dumps(parameter))
     return json.dumps(parameter, ensure_ascii=False)
+
 
 # 按列拆分页面路由
 @app.route("/columnSplit", methods=['GET', 'POST'])
@@ -222,10 +235,11 @@ def columnSplit():
     # # 对参数格式进行转化：json->字典，并进一步进行解析
     # requestDict = json.loads(requestStr)
     a = datetime.now()
-    requestDict = {"userId": "1", "projectName": "特征工程测试项目", "columnName": "订购日期", "delimiter": "/","newColumnNames":["year","月"]}
+    requestDict = {"userId": "1", "projectName": "特征工程测试项目", "columnName": "订购日期", "delimiter": "/",
+                   "newColumnNames": ["year", "月"]}
     requestStr = str(requestDict)
 
-    userId = requestDict['userId']           # 用户ID
+    userId = requestDict['userId']  # 用户ID
     projectName = requestDict['projectName']
     functionName = "columnSplit"
     state = True
@@ -252,8 +266,8 @@ def columnSplit():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
 
-    #追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '1003', requestStr)
+    # 追加处理流程记录
+    resultStr = addProcessingFlow(projectName, userId, operatorType.COLUMNSPLIT.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -264,7 +278,7 @@ def columnSplit():
 
 
 # 按列拆分主函数，函数功能包括解析参数、拆分；返回df(spark格式)
-def columnSplitCore(ss,df,requestDict):
+def columnSplitCore(ss, df, requestDict):
     # 对参数格式进行转化：json->字典，并进一步进行解析
     columnName = requestDict['columnName']
     delimiter = requestDict['delimiter']
@@ -363,14 +377,14 @@ def rowSplitCore(requestStr):
     # 识别splitStr中的符号
     splitSymbol = symbolRecognition(splitStr)
     if splitSymbol == '':
-        return "error_splitSymbol"                                 # 错误类型：指定列中不含可供拆分的符号
+        return "error_splitSymbol"  # 错误类型：指定列中不含可供拆分的符号
 
     # 将指定列columnName按splitSymbol拆分，存入newColumnName列的多行
     df = df.withColumn(newColumnName, explode(split(df[columnName], splitSymbol)))
     df.show()
 
-    #追加处理流程记录
-    addProcessingFlow(projectName, userId, '1004', requestStr)
+    # 追加处理流程记录
+    addProcessingFlow(projectName, userId, operatorType.ROWSPLIT.value, requestStr)
     return df
 
 
@@ -385,10 +399,10 @@ def columnsMerge():
 
     a = datetime.now()
 
-
     # # 对参数格式进行转化：json->字典，并进一步进行解析
     # requestDict = json.loads(requestStr)
-    requestDict = {"userId": "1", "projectName": "订单分析", "columnNames": ["类别","子类别","产品名称"], "connector": "-","newColumnName":"品类名称"}
+    requestDict = {"userId": "1", "projectName": "订单分析", "columnNames": ["类别", "子类别", "产品名称"], "connector": "-",
+                   "newColumnName": "品类名称"}
     requestStr = str(requestDict)
 
     projectName = requestDict['projectName']
@@ -415,7 +429,7 @@ def columnsMerge():
     df_pandas.to_csv(save_dir, header=True)
 
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '1005', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.COLUMNMERGE.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -423,6 +437,7 @@ def columnsMerge():
     b = datetime.now()
     print('-------------------------', b - a)
     return returnDataModel(df, state, reason)
+
 
 # 多列合并主函数，新增一列，列内的值为指定多列合并而成；返回df(spark格式)
 def columnsMergeCore(df, requestDict):
@@ -442,9 +457,12 @@ def columnsMergeCore(df, requestDict):
     if len(columnNames) == 2:
         df = df.withColumn(newColumnName, concat_ws(splitSymbol, df[columnNames[0]], df[columnNames[1]]))
     elif len(columnNames) == 3:
-        df = df.withColumn(newColumnName, concat_ws(splitSymbol, df[columnNames[0]], df[columnNames[1]], df[columnNames[2]]))
+        df = df.withColumn(newColumnName,
+                           concat_ws(splitSymbol, df[columnNames[0]], df[columnNames[1]], df[columnNames[2]]))
     elif len(columnNames) == 4:
-        df = df.withColumn(newColumnName, concat_ws(splitSymbol, df[columnNames[0]], df[columnNames[1]], df[columnNames[2]], df[columnNames[3]]))
+        df = df.withColumn(newColumnName,
+                           concat_ws(splitSymbol, df[columnNames[0]], df[columnNames[1]], df[columnNames[2]],
+                                     df[columnNames[3]]))
     return df
 
 
@@ -461,7 +479,9 @@ def replace():
     # requestDict = json.loads(requestStr)
 
     a = datetime.now()
-    requestDict = {"userId": "1", "projectName": "订单分析", "columnNames": ["类别","子类别","客户名称"], "sourceCharacters": ["技术","电话","CraigReiter","复印机"],"targetCharacters": ["技术copy","电话copy","CraigReitercopy","复印机copy"]}
+    requestDict = {"userId": "1", "projectName": "订单分析", "columnNames": ["类别", "子类别", "客户名称"],
+                   "sourceCharacters": ["技术", "电话", "CraigReiter", "复印机"],
+                   "targetCharacters": ["技术copy", "电话copy", "CraigReitercopy", "复印机copy"]}
     requestStr = str(requestDict)
 
     projectName = requestDict['projectName']
@@ -488,7 +508,7 @@ def replace():
     df_pandas.to_csv(save_dir, header=True)
 
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, '1006', requestStr)
+    resultStr = addProcessingFlow(projectName, userId, operatorType.REPLACE.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -496,6 +516,7 @@ def replace():
     b = datetime.now()
     print('-------------------------', b - a)
     return returnDataModel(df, state, reason)
+
 
 # 数据列替换主函数, 将某列中的字符进行替换；返回df(spark格式)
 def replaceCore(df, requestDict):
@@ -513,10 +534,12 @@ def replaceCore(df, requestDict):
         df = df.withColumnRenamed("temp", columnName)
     return df
 
-def mul_regexp_replace(col,sourceCharacters,targetCharacters):
+
+def mul_regexp_replace(col, sourceCharacters, targetCharacters):
     for i in range(len(sourceCharacters)):
         col = regexp_replace(col, sourceCharacters[i], targetCharacters[i])
     return col
+
 
 @app.route("/testTime", methods=['GET', 'POST'])
 def testTime():

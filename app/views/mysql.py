@@ -1,9 +1,11 @@
 # encoding=utf8
 import sys
 from importlib import reload
+
 reload(sys)
 
-from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, abort
+from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, \
+    abort
 from flask.json import jsonify
 from app import app
 from app import db
@@ -16,7 +18,8 @@ from app.utils import mkdir, getProjectCurrentDataUrl, getProjectByNameAndUserId
 from app.constFile import const
 from app.models.serverNameMap import ServerNameMap
 
-#解决 list, dict 不能返回的问题
+
+# 解决 list, dict 不能返回的问题
 class MyResponse(Response):
     @classmethod
     def force_type(cls, response, environ=None):
@@ -24,35 +27,39 @@ class MyResponse(Response):
             response = jsonify(response)
         return super(Response, cls).force_type(response, environ)
 
+
 app.response_class = MyResponse
 
-#初始化表，在mysql中新建表，对已存在的表无影响
+
+# 初始化表，在mysql中新建表，对已存在的表无影响
 # initdb()
 
-#得到数据源列表
+# 得到数据源列表
 @app.route('/getDataSource', methods=['GET', 'POST'])
 def getDataSource():
     DSs = DataSource.query.all()
     result = []
     for i in DSs:
-        result.append({"id":i.id,"name":i.file_name})
+        result.append({"id": i.id, "name": i.file_name})
     return result
 
-#创建项目
+
+# 创建项目
 @app.route('/creatProject', methods=['GET', 'POST'])
 def creatProject():
     if request.method == 'GET':
         projectName = request.form.get('projectName')
         dataSourceId = request.form.get('dataSourceId')
-        userId =  request.form.get('userId')
+        userId = request.form.get('userId')
     else:
         projectName = request.form.get('projectName')
         dataSourceId = request.form.get('dataSourceId')
         userId = request.form.get('userId')
-    print('projectName: {}, dataSourceId: {}, userId: {}'.format(projectName, dataSourceId,userId))
+    print('projectName: {}, dataSourceId: {}, userId: {}'.format(projectName, dataSourceId, userId))
     rootUrl = const.ROOTURL
     # 数据库中添加Project记录
-    project = Project(project_name=projectName,project_address=rootUrl+projectName,user_id = userId, dataSource_id = dataSourceId)
+    project = Project(project_name=projectName, project_address=rootUrl + projectName, user_id=userId,
+                      dataSource_id=dataSourceId)
     db.session.add(project)
     # 数据库中添加ProcessFlow记录
     pro = getProjectByNameAndUserId(projectName, userId)
@@ -60,24 +67,25 @@ def creatProject():
     db.session.add(processs)
     db.session.commit()
     try:
-        if(not (os.path.exists(rootUrl+projectName))):
+        if (not (os.path.exists(rootUrl + projectName))):
             filters = {
-                DataSource.id ==dataSourceId
+                DataSource.id == dataSourceId
             }
             DSs = DataSource.query.filter(*filters).first()
             db.session.commit()
-            mkdir(rootUrl+projectName)
+            mkdir(rootUrl + projectName)
             print(DSs.file_url)
-            print(rootUrl+projectName)
-            shutil.copyfile(DSs.file_url, rootUrl+projectName+'/'+DSs.file_name+'.csv')
+            print(rootUrl + projectName)
+            shutil.copyfile(DSs.file_url, rootUrl + projectName + '/' + DSs.file_name + '.csv')
             return getProjectList()
         else:
             return "Double name"
     except:
         return "error"
 
-#获取项目列表
-@app.route('/getProjectList', methods=['GET','POST'])
+
+# 获取项目列表
+@app.route('/getProjectList', methods=['GET', 'POST'])
 def getProjectList():
     DSs = Project.query.all()
     result = []
@@ -85,8 +93,9 @@ def getProjectList():
         result.append({"id": i.id, "name": i.project_name})
     return result
 
-#获取项目列表
-@app.route('/getProcessFlowByProjectId', methods=['GET','POST'])
+
+# 获取项目列表
+@app.route('/getProcessFlowByProjectId', methods=['GET', 'POST'])
 def getProcessFlowByProjectId():
     if request.method == 'GET':
         projectId = request.args.get("projectId")
@@ -107,13 +116,14 @@ def getProcessFlowByProjectId():
     result['class'] = 'go.GraphLinksModel'
     return result
 
-#原始数据预览
-@app.route('/rawDataPreview', methods=['GET','POST'])
+
+# 原始数据预览
+@app.route('/rawDataPreview', methods=['GET', 'POST'])
 def rawDataPreview():
     if request.method == 'GET':
         start = request.form.get('start')
         end = request.form.get('end')
-        projectName =  request.form.get('projectName')
+        projectName = request.form.get('projectName')
     else:
         start = request.form.get('start')
         end = request.form.get('end')
@@ -131,13 +141,14 @@ def rawDataPreview():
     except:
         return "error read"
 
-#当前数据预览
-@app.route('/currentDataPreview', methods=['GET','POST'])
+
+# 当前数据预览
+@app.route('/currentDataPreview', methods=['GET', 'POST'])
 def currentDataPreview():
     if request.method == 'GET':
         start = request.form.get('start')
         end = request.form.get('end')
-        projectName =  request.form.get('projectName')
+        projectName = request.form.get('projectName')
     else:
         start = request.form.get('start')
         end = request.form.get('end')

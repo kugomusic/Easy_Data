@@ -1,11 +1,12 @@
 # -*- coding: UTF-8 -*-
-from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, abort
+from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, \
+    abort
 from flask.json import jsonify
 from app import app
 import json
 import os
 import time
-from app.utils import mkdir,getProjectCurrentDataUrl,is_number,addProcessingFlow,getProjectByNameAndUserId,getProcessFlowByProjectId
+from app.utils import *
 from app.views import process
 import app.utils as apus
 import pandas as pd
@@ -13,14 +14,18 @@ from pyspark.sql import SparkSession
 import random
 import string
 
-#解决 list, dict 不能返回的问题
+
+# 解决 list, dict 不能返回的问题
 class MyResponse(Response):
     @classmethod
     def force_type(cls, response, environ=None):
         if isinstance(response, (list, dict)):
             response = jsonify(response)
         return super(Response, cls).force_type(response, environ)
+
+
 app.response_class = MyResponse
+
 
 # 解析filter参数函数
 def parsingFilterParameters(str):
@@ -36,6 +41,7 @@ def parsingFilterParameters(str):
         condition.append(con)
     return condition
 
+
 # 查看处理流程
 @app.route("/getOperateFlow", methods=['POST'])
 def getOperateFlow():
@@ -50,10 +56,11 @@ def getOperateFlow():
         # print(item)
         # print(item['type'])
         # print(item['operate'])
-        if(item['type'] == '1'):
+        if (item['type'] == '1'):
             item['operate'] = parsingFilterParameters(item['operate'])
     print(operates)
     return operates
+
 
 # 重新执行处理流程
 @app.route("/executeAgain", methods=['POST'])
@@ -66,12 +73,15 @@ def executeAgain():
     operates = json.loads(processflow.operates)
     fileUrl = getProjectCurrentDataUrl(projectName)['fileUrl']
     # print(operates)
-    spark = SparkSession \
-        .builder \
-        .master("local") \
-        .config("spark.some.config.option", "some-value") \
-        .getOrCreate()
+    functionName = projectName + "-executeAgain"
+
+    # spark会话
+    spark = getSparkSession(userId, functionName)
+
+    # 获取数据
     df = spark.read.format("CSV").option("header", "true").load(fileUrl)
+
+    # 执行DAG图
     for item in operates:
         if (item['type'] == '1'):
             # 解析参数格式
@@ -79,6 +89,8 @@ def executeAgain():
             # 过滤函数
             df = process.filterCore(spark, df, condition)
             df.show()
+
+
     # 处理后的数据写入文件
     df.toPandas().to_csv("/home/zk/data/test.csv", header=True)
     # 返回前50条数据

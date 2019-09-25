@@ -1,21 +1,23 @@
 # -*- coding: UTF-8 -*-
-from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, abort
+from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, \
+    abort
 from flask.json import jsonify
 from app import app
 from app import db
-from app.models.mysql import DataSource, Project,initdb
+from app.models.mysql import DataSource, Project, initdb
 import shutil
 import json
 import os
 import time
-from app.utils import mkdir,getProjectCurrentDataUrl
+from app.utils import mkdir, getProjectCurrentDataUrl
 import pandas as pd
 from pyspark.sql import SparkSession
 from app.constFile import const
 
 jsonFileName = const.JSONFILENAME
 
-#解决 list, dict 不能返回的问题
+
+# 解决 list, dict 不能返回的问题
 class MyResponse(Response):
     @classmethod
     def force_type(cls, response, environ=None):
@@ -23,10 +25,12 @@ class MyResponse(Response):
             response = jsonify(response)
         return super(Response, cls).force_type(response, environ)
 
+
 app.response_class = MyResponse
 
+
 # 获取项目对应的当前数据源的所有列名
-@app.route("/getColumnNames", methods=['GET','POST'])
+@app.route("/getColumnNames", methods=['GET', 'POST'])
 def getColumnNames():
     if request.method == 'GET':
         projectName = request.args.get('projectName')
@@ -39,8 +43,9 @@ def getColumnNames():
     except:
         return "error read"
 
+
 # 获取项目对应的当前数据源的 数值型 的列名
-@app.route("/getColumnNameWithNumberType", methods=['GET','POST'])
+@app.route("/getColumnNameWithNumberType", methods=['GET', 'POST'])
 def getColumnNameWithNumberType():
     if request.method == 'GET':
         projectName = request.args.get('projectName')
@@ -51,11 +56,12 @@ def getColumnNameWithNumberType():
         data = pd.read_csv(fileUrl, encoding='utf-8')
         res = []
         for col in data.columns.values.tolist():
-            if(data[col].dtype == 'int64' or data[col].dtype == 'float64'):
+            if (data[col].dtype == 'int64' or data[col].dtype == 'float64'):
                 res.append(col)
         return res
     except:
         return "error read"
+
 
 # 全表统计接口
 @app.route("/fullTableStatistics", methods=['POST'])
@@ -64,10 +70,10 @@ def fullTableStatistics():
     print(request.form)
     columnNameStr = request.form.get('columnNames')
     projectName = request.form.get("projectName")
-    columnNameStr = columnNameStr[1:len(columnNameStr)-1]
+    columnNameStr = columnNameStr[1:len(columnNameStr) - 1]
     columnNames = columnNameStr.split(',')
     for i in range(len(columnNames)):
-        columnNames[i] = columnNames[i][1:len(columnNames[i])-1]
+        columnNames[i] = columnNames[i][1:len(columnNames[i]) - 1]
     print('projectName: {}, columnNames: {}'.format(projectName, columnNames))
     # 读取项目对应的当前数据
     urls = getProjectCurrentDataUrl(projectName)
@@ -79,7 +85,8 @@ def fullTableStatistics():
         df_excel = pd.read_excel(fileUrl, encoding="utf-8")
     # 全表统计
     res = []
-    statistics = [' 字段名',' 类型','总数','最小值','最小值位置','25%分位数','中位数','75%分位数','均值','最大值','最大值位置','平均绝对偏差','方差','标准差','偏度','峰度']
+    statistics = [' 字段名', ' 类型', '总数', '最小值', '最小值位置', '25%分位数', '中位数', '75%分位数', '均值', '最大值', '最大值位置', '平均绝对偏差', '方差',
+                  '标准差', '偏度', '峰度']
     for columnName in columnNames:
         info = {}.fromkeys(statistics)
         info[' 字段名'] = columnName
@@ -107,13 +114,13 @@ def fullTableStatistics():
             print("text")
         res.append(info)
     # 写入文件
-    mkdir(projectAddress+'/全表统计')
+    mkdir(projectAddress + '/全表统计')
     from app.constFile import const
 
     save_dir = const.SAVEDIR
     # jsonFileName = str(int(time.time()))+'.json'
     json_str = json.dumps(res, ensure_ascii=False)
-    with open(projectAddress+'/全表统计/' + jsonFileName, "w", encoding="utf-8") as f:
+    with open(projectAddress + '/全表统计/' + jsonFileName, "w", encoding="utf-8") as f:
         json.dump(json_str, f, ensure_ascii=False)
         print("加载入文件完成...")
     result = {}
@@ -123,29 +130,31 @@ def fullTableStatistics():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-def getfileListFun(viewsName,projectName):
+
+def getfileListFun(viewsName, projectName):
     urls = getProjectCurrentDataUrl(projectName)
-    if(viewsName == 'FullTableStatisticsView'):
+    if (viewsName == 'FullTableStatisticsView'):
         viewsName = '全表统计'
-    elif(viewsName == 'FrequencyStatisticsView'):
+    elif (viewsName == 'FrequencyStatisticsView'):
         viewsName = '频次统计'
     elif (viewsName == 'CorrelationCoefficientView'):
         viewsName = '相关系数'
     elif (viewsName == 'ScatterPlot'):
         viewsName = '散点图'
-    projectAddress = urls['projectAddress']+'/'+viewsName
+    projectAddress = urls['projectAddress'] + '/' + viewsName
     if not os.path.exists(projectAddress):
         return []
     for root, dirs, files in os.walk(projectAddress):
         # print(root) #当前目录路径
         # print(dirs) #当前路径下所有子目录
-        print(files)  #当前路径下所有非目录子文件！
+        print(files)  # 当前路径下所有非目录子文件！
     result = []
     for i in range(len(files)):
         if files[i] != jsonFileName:
             le = len(files[i])
             result.append(files[i][0:le - 5])
     return result
+
 
 # 获取某一类视图的列表(核心函数是 getfileListFun)
 @app.route("/getfileList", methods=['POST'])
@@ -154,6 +163,7 @@ def getfileList():
     projectName = request.form.get("projectName")
     print('viewsName: {}, projectName: {}'.format(viewsName, projectName))
     return getfileListFun(viewsName, projectName)
+
 
 # 获取某一类视图中的一个视图
 @app.route("/getViewData", methods=['POST'])
@@ -171,12 +181,13 @@ def getViewData():
         viewsName = '相关系数'
     elif (viewsName == 'ScatterPlot'):
         viewsName = '散点图'
-    viewFileUrl = urls['projectAddress']+'/'+viewsName+'/' + viewFileName +'.json'
+    viewFileUrl = urls['projectAddress'] + '/' + viewsName + '/' + viewFileName + '.json'
     # 读入数据
     with open(viewFileUrl, 'r') as load_f:
         load_dict = json.load(load_f)
         load_dict = json.loads(load_dict)
     return load_dict
+
 
 # 保存某一类视图中的一个视图
 @app.route("/saveViewData", methods=['POST'])
@@ -194,8 +205,8 @@ def saveViewData():
         viewsName = '相关系数'
     elif (viewsName == 'ScatterPlot'):
         viewsName = '散点图'
-    viewFileUrl = urls['projectAddress']+'/'+viewsName+'/' + jsonFileName
-    newfile_path = urls['projectAddress']+'/'+viewsName+'/' + newFileName + '.json'
+    viewFileUrl = urls['projectAddress'] + '/' + viewsName + '/' + jsonFileName
+    newfile_path = urls['projectAddress'] + '/' + viewsName + '/' + newFileName + '.json'
     # 复制文件
     try:
         shutil.copyfile(viewFileUrl, newfile_path)
@@ -222,11 +233,11 @@ def deleteViewData():
         viewsName = '相关系数'
     elif (viewsName == 'ScatterPlot'):
         viewsName = '散点图'
-    file_path = urls['projectAddress']+'/'+viewsName+'/' + fileName + '.json'
-    print('删除文件的路径：',file_path)
+    file_path = urls['projectAddress'] + '/' + viewsName + '/' + fileName + '.json'
+    print('删除文件的路径：', file_path)
     # 删除文件
     try:
-        if(os.path.exists(file_path)):
+        if (os.path.exists(file_path)):
             os.remove(file_path)
             print('删除成功')
             return getfileListFun(viewsName, projectName)
@@ -236,6 +247,8 @@ def deleteViewData():
     except Exception as e:
         print('删除失败', e)
         return '删除失败' + str(e)
+
+
 '''
 # 删除视图
 @app.route("/deleteViewData", methods=['POST'])
@@ -393,11 +406,12 @@ def deleteCompletely():
         return files
 '''
 
+
 # 获取项目对应的当前数据源的所有列名和所有视图（）
-@app.route("/getColumnNamesAndViews", methods=['GET','POST'])
+@app.route("/getColumnNamesAndViews", methods=['GET', 'POST'])
 def getColumnNamesAndViews():
     if request.method == 'GET':
-        projectName =  request.args.get('projectName')
+        projectName = request.args.get('projectName')
     else:
         projectName = request.form.get('projectName')
     fileUrl = getProjectCurrentDataUrl(projectName)['fileUrl']
