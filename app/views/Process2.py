@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 from flask import request, jsonify, Response
 from app import app
-from app.utils import *
-from app.enmus.EnumConst import operatorType
-from app.constFile import const
+from app.Utils import *
+from app.enmus.EnumConst import OperatorType
+from app.ConstFile import const
 
 save_dir = const.SAVEDIR
 
@@ -50,7 +50,7 @@ def fillNullValue():
     # 处理后的数据写入文件
     sqlDF.toPandas().to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.FILLNULLVALUE.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.FILLNULLVALUE.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -126,7 +126,7 @@ def columnMap():
     # 处理后的数据写入文件
     sqlDF.toPandas().to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.COLUMNMAP.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.COLUMNMAP.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr

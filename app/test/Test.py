@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-from app.utils import getProjectCurrentDataUrl
+from app.Utils import getProjectCurrentDataUrl
 import pandas as pd
 
 def fullTableStatistics2():

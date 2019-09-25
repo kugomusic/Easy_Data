@@ -1,4 +1,4 @@
 # -*- coding: UTF-8 -*-
-import app.views.process as process
+import app.views.Process as process
 
 process.filterMultiConditions()

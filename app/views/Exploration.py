@@ -4,15 +4,14 @@ from flask import flash, get_flashed_messages, redirect, render_template, reques
 from flask.json import jsonify
 from app import app
 from app import db
-from app.models.mysql import DataSource, Project, initdb
+from app.models.Mysql import DataSource, Project, initdb
 import shutil
 import json
 import os
 import time
-from app.utils import mkdir, getProjectCurrentDataUrl
+from app.Utils import mkdir, getProjectCurrentDataUrl
 import pandas as pd
-from pyspark.sql import SparkSession
-from app.constFile import const
+from app.ConstFile import const
 
 jsonFileName = const.JSONFILENAME
 
@@ -115,7 +114,7 @@ def fullTableStatistics():
         res.append(info)
     # 写入文件
     mkdir(projectAddress + '/全表统计')
-    from app.constFile import const
+    from app.ConstFile import const
 
     save_dir = const.SAVEDIR
     # jsonFileName = str(int(time.time()))+'.json'

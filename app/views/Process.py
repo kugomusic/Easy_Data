@@ -3,12 +3,12 @@ from flask import flash, get_flashed_messages, redirect, render_template, reques
     abort
 from flask.json import jsonify
 from app import app
-from app.utils import *
+from app.Utils import *
 from app.enmus.EnumConst import *
 from pyspark.sql.functions import split, explode, concat_ws, regexp_replace
 import random
 import string
-from app.constFile import const
+from app.ConstFile import const
 
 from datetime import datetime
 
@@ -68,7 +68,7 @@ def filterMultiConditions():
     # sqlDF.coalesce(1).write.option("header", "true").csv("/home/zk/data/test.csv")
     sqlDF.toPandas().to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.FILTER.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.FILTER.value, requestStr)
     if resultStr != "":
         state = False
         reason = reason + "  " + resultStr
@@ -173,7 +173,7 @@ def sort():
     df_pandas.to_csv(save_dir, header=True)
 
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.SORT.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.SORT.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -267,7 +267,7 @@ def columnSplit():
     df_pandas.to_csv(save_dir, header=True)
 
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.COLUMNSPLIT.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.COLUMNSPLIT.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -384,7 +384,7 @@ def rowSplitCore(requestStr):
     df.show()
 
     # 追加处理流程记录
-    addProcessingFlow(projectName, userId, operatorType.ROWSPLIT.value, requestStr)
+    addProcessingFlow(projectName, userId, OperatorType.ROWSPLIT.value, requestStr)
     return df
 
 
@@ -429,7 +429,7 @@ def columnsMerge():
     df_pandas.to_csv(save_dir, header=True)
 
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.COLUMNMERGE.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.COLUMNMERGE.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -508,7 +508,7 @@ def replace():
     df_pandas.to_csv(save_dir, header=True)
 
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.REPLACE.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.REPLACE.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr

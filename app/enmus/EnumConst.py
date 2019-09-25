@@ -4,7 +4,7 @@ from enum import Enum
 
 # 继承枚举类
 # 算子编码枚举类
-class operatorType(Enum):
+class OperatorType(Enum):
     ## 数据预处理
     # 过滤
     FILTER = '1001'

@@ -3,9 +3,9 @@ from flask import request
 from app import app
 from pyspark.sql import utils
 from pyspark.ml.feature import *
-from app.constFile import const
-from app.utils import *
-from app.enmus.EnumConst import operatorType
+from app.ConstFile import const
+from app.Utils import *
+from app.enmus.EnumConst import OperatorType
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
 
@@ -54,7 +54,7 @@ def quantileDiscretization():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.QUANTILEDISCRETIZATION.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.QUANTILEDISCRETIZATION.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -129,7 +129,7 @@ def vectorIndexer():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.VECTORINDEXER.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.VECTORINDEXER.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -217,7 +217,7 @@ def standardScaler():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.STANDARDSCALER.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.STANDARDSCALER.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -308,7 +308,7 @@ def pca():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.PCA.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.PCA.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -393,7 +393,7 @@ def stringIndexer():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.STRINGINDEXER.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.STRINGINDEXER.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -451,7 +451,7 @@ def oneHotEncoder():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.ONEHOTENCODER.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.ONEHOTENCODER.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -516,7 +516,7 @@ def polynomialExpansion():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.POLYNOMIALEXPANSION.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.POLYNOMIALEXPANSION.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr
@@ -606,7 +606,7 @@ def chiSqSelector():
     df_pandas = df.toPandas()
     df_pandas.to_csv(save_dir, header=True)
     # 追加处理流程记录
-    resultStr = addProcessingFlow(projectName, userId, operatorType.CHISQSELECTOR.value, requestStr)
+    resultStr = addProcessingFlow(projectName, userId, OperatorType.CHISQSELECTOR.value, requestStr)
     if resultStr != "":
         state = False
         reason = resultStr

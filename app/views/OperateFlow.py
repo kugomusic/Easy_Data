@@ -6,9 +6,9 @@ from app import app
 import json
 import os
 import time
-from app.utils import *
-from app.views import process
-import app.utils as apus
+from app.Utils import *
+from app.views import Process
+import app.Utils as apus
 import pandas as pd
 from pyspark.sql import SparkSession
 import random
@@ -87,7 +87,7 @@ def executeAgain():
             # 解析参数格式
             condition = parsingFilterParameters(item['operate'])
             # 过滤函数
-            df = process.filterCore(spark, df, condition)
+            df = Process.filterCore(spark, df, condition)
             df.show()
 
 
