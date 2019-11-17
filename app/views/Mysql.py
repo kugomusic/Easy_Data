@@ -4,8 +4,7 @@ from importlib import reload
 
 reload(sys)
 
-from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, \
-    abort
+from flask import request, jsonify, Response
 from flask.json import jsonify
 from app import app
 from app import db
@@ -34,14 +33,14 @@ app.response_class = MyResponse
 # 初始化表，在mysql中新建表，对已存在的表无影响
 # initdb()
 
-# 得到数据源列表
-@app.route('/getDataSource', methods=['GET', 'POST'])
-def getDataSource():
-    DSs = DataSource.query.all()
-    result = []
-    for i in DSs:
-        result.append({"id": i.id, "name": i.file_name})
-    return result
+# # 得到数据源列表
+# @app.route('/getDataSource', methods=['GET', 'POST'])
+# def getDataSource():
+#     DSs = DataSource.query.all()
+#     result = []
+#     for i in DSs:
+#         result.append({"id": i.id, "name": i.file_name})
+#     return result
 
 
 # 创建项目
@@ -94,18 +93,42 @@ def getProjectList():
     return result
 
 
-# 获取项目列表
+# 获取项目处理流程
 @app.route('/getProcessFlowByProjectId', methods=['GET', 'POST'])
 def getProcessFlowByProjectId():
+    # 接收参数
     if request.method == 'GET':
         projectId = request.args.get("projectId")
     else:
         projectId = request.form.get("projectId")
-    DSs = ProcessFlow.query.filter(ProcessFlow.project_id == projectId).one()
+
+    # 定义返回状态
     result = {}
+    result['success'] = True
+    result['errorCode'] = 200
+    result['errorMrg'] = ''
+
+    # 查询projectId 对应的处理流程
+    try:
+        DSs = ProcessFlow.query.filter(ProcessFlow.project_id == projectId).one()
+    except:
+        result['success'] = False
+        result['errorCode'] = 550
+        result['errorMrg'] = '没有该项目ID：' + projectId
+        return result
+    print(DSs)
+
+    # 整理返回格式
     result['id'] = DSs.id
-    result['linkDataArray'] = json.loads(DSs.links)
-    operates = json.loads(DSs.operates)
+    if (DSs.links is None) or (DSs.links == ''):
+        result['linkDataArray'] = ''
+    else:
+        result['linkDataArray'] = json.loads(DSs.links)
+
+    if (DSs.operates is None) or (DSs.operates == ''):
+        operates = []
+    else:
+        operates = json.loads(DSs.operates)
     for operate in operates:
         operate['operateId'] = operate['type']
         operate['operate'] = json.loads(operate['operate'])
@@ -167,3 +190,4 @@ def currentDataPreview():
         return jsonify({'length': len(data), 'data': json.loads(data2)})
     except:
         return "error read"
+

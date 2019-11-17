@@ -1,15 +1,11 @@
 # -*- coding: UTF-8 -*-
-from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, \
-    abort
-from flask.json import jsonify
+from flask import request, jsonify, Response
 from app import app
 from app.Utils import *
 from app.enmus.EnumConst import *
 from pyspark.sql.functions import split, explode, concat_ws, regexp_replace
-import random
-import string
+import random, string
 from app.ConstFile import const
-
 from datetime import datetime
 
 save_dir = const.SAVEDIR
@@ -35,17 +31,22 @@ app.response_class = MyResponse
 
 @app.route("/filter", methods=['GET', 'POST'])
 def filterMultiConditions():
-    # 接受请求传参，例如: {"userId":"1","projectName":"特征工程测试项目","parameter":[{"colName":"利润", "operate":">", "value":"100", "relation":"AND"},{"colName":"装运方式", "operate":"==", "value":"一级", "relation":""}]}
-    # if request.method == 'GET':
-    #     requestStr = request.args.get("requestStr")
-    # else:
-    #     requestStr = request.form.get("requestStr")
+    """
+    接受请求传参，例如: {"userId":"1","projectName":"特征工程测试项目","parameter":[{"colName":"利润", "operate":">", "value":"100", "relation":"AND"},{"colName":"装运方式", "operate":"==", "value":"一级", "relation":""}]}
+
+    :return:
+    """
+    if request.method == 'GET':
+        requestStr = request.args.get("requestStr")
+    else:
+        requestStr = request.form.get("requestStr")
     a = datetime.now()
-    requestDict = {"userId": "1", "projectName": "特征工程测试项目",
-                   "parameter": [{"colName": "利润", "operate": ">", "value": "100", "relation": "AND"},
-                                 {"colName": "装运方式", "operate": "==", "value": "一级", "relation": ""}]}
-    requestStr = str(requestDict)
-    # requestDict = json.loads(requestStr)
+    ## 参数测试例子
+    # requestDict = {"userId": "1", "projectName": "特征工程测试项目",
+    #                "parameter": [{"colName": "利润", "operate": ">", "value": "100", "relation": "AND"},
+    #                              {"colName": "装运方式", "operate": "==", "value": "一级", "relation": ""}]}
+    # requestStr = json.dumps(requestDict)
+    requestDict = json.loads(requestStr)
     projectName = requestDict['projectName']  # 项目名称
     userId = requestDict['userId']  # 用户ID
     parameter = requestDict['parameter']
@@ -134,16 +135,19 @@ def filterCore(spark, df, condition):
 @app.route("/sort", methods=['GET', 'POST'])
 def sort():
     # 接受请求传参，例如: {"userId":"1","projectName":"订单分析","columnName":"利润","sortType":"降序"}
-    # if request.method == 'GET':
-    #     requestStr = request.args.get("requestStr")
-    # else:
-    #     requestStr = request.form.get("requestStr")
-    # # 对参数格式进行转化：json->字典，并进一步进行解析
-    # requestDict = json.loads(requestStr)
+    ## 接收参数
+    if request.method == 'GET':
+        requestStr = request.args.get("requestStr")
+    else:
+        requestStr = request.form.get("requestStr")
+    # 对参数格式进行转化：json->字典，并进一步进行解析
+    requestDict = json.loads(requestStr)
+
     a = datetime.now()
 
-    requestDict = {"userId": "1", "projectName": "特征工程测试项目", "columnName": "利润", "sortType": "升序"}
-    requestStr = str(requestDict)
+    ## 参数示例
+    # requestDict = {"userId": "1", "projectName": "特征工程测试项目", "columnName": "利润", "sortType": "升序"}
+    # requestStr = json.dumps(requestDict)
 
     projectName = requestDict['projectName']  # 项目名称
     userId = requestDict['userId']  # 用户ID
@@ -169,8 +173,7 @@ def sort():
         return returnDataModel(df, state, reason)
 
     # 处理后的数据写入文件（借助pandas进行存储、返回）
-    df_pandas = df.toPandas()
-    df_pandas.to_csv(save_dir, header=True)
+    df.toPandas().to_csv(save_dir, header=True)
 
     # 追加处理流程记录
     resultStr = addProcessingFlow(projectName, userId, OperatorType.SORT.value, requestStr)
@@ -227,17 +230,20 @@ def jsontostrTest():
 @app.route("/columnSplit", methods=['GET', 'POST'])
 def columnSplit():
     # # 接受请求传参，例如: {"userId":"1","project":"订单分析","columnName":"订购日期","newColumnNames":["年","月","日"]}
-    # if request.method == 'GET':
-    #     requestStr = request.args.get("requestStr")
-    # else:
-    #     requestStr = request.form.get("requestStr")
-    #
-    # # 对参数格式进行转化：json->字典，并进一步进行解析
-    # requestDict = json.loads(requestStr)
+    if request.method == 'GET':
+        requestStr = request.args.get("requestStr")
+    else:
+        requestStr = request.form.get("requestStr")
+
+    # 对参数格式进行转化：json->字典，并进一步进行解析
+    requestDict = json.loads(requestStr)
+
     a = datetime.now()
-    requestDict = {"userId": "1", "projectName": "特征工程测试项目", "columnName": "订购日期", "delimiter": "/",
-                   "newColumnNames": ["year", "月"]}
-    requestStr = str(requestDict)
+
+    ## 参数示例
+    # requestDict = {"userId": "1", "projectName": "特征工程测试项目", "columnName": "订购日期", "delimiter": "/",
+    #                "newColumnNames": ["year", "月"]}
+    # requestStr = json.dumps(requestDict)
 
     userId = requestDict['userId']  # 用户ID
     projectName = requestDict['projectName']
@@ -291,6 +297,9 @@ def columnSplitCore(ss, df, requestDict):
     except:
         newColumnNames = []
     # 将指定列columnName按splitSymbol拆分，存入"splitColumn"列，列内数据格式为[a, b, c, ...]
+    print('---------------------------------------------------')
+    # df.show()
+    # df.head()
     first_row = df.first()
     df_split = df.withColumn("splitColumn", split(df[columnName], delimiter))
     splitNumber = len(first_row[columnName].split(delimiter))
@@ -392,18 +401,19 @@ def rowSplitCore(requestStr):
 @app.route("/columnsMerge", methods=['GET', 'POST'])
 def columnsMerge():
     # 接受请求传参，例如: {"projectName":"订单分析","columnNames":["类别","子类别","产品名称"],"newColumnName":"品类名称","splitSymbol":"-"}
-    # if request.method == 'GET':
-    #     requestStr = request.args.get("requestStr")
-    # else:
-    #     requestStr = request.form.get("requestStr")
+    if request.method == 'GET':
+        requestStr = request.args.get("requestStr")
+    else:
+        requestStr = request.form.get("requestStr")
+    # 对参数格式进行转化：json->字典，并进一步进行解析
+    requestDict = json.loads(requestStr)
 
     a = datetime.now()
 
-    # # 对参数格式进行转化：json->字典，并进一步进行解析
-    # requestDict = json.loads(requestStr)
-    requestDict = {"userId": "1", "projectName": "订单分析", "columnNames": ["类别", "子类别", "产品名称"], "connector": "-",
-                   "newColumnName": "品类名称"}
-    requestStr = str(requestDict)
+    ## 参数示例
+    # requestDict = {"userId": "1", "projectName": "订单分析", "columnNames": ["类别", "子类别", "产品名称"], "connector": "-",
+    #                "newColumnName": "品类名称"}
+    # requestStr = json.dumps(requestDict)
 
     projectName = requestDict['projectName']
     userId = '1'
@@ -470,19 +480,20 @@ def columnsMergeCore(df, requestDict):
 @app.route("/replace", methods=['GET', 'POST'])
 def replace():
     # # 接受请求传参，例如: {"project":"订单分析","columnName":"客户ID","sourceCharacter":"0","targetCharacter":"Q"}
-    # if request.method == 'GET':
-    #     requestStr = request.args.get("requestStr")
-    # else:
-    #     requestStr = request.form.get("requestStr")
-    #
-    # # 对参数格式进行转化：json->字典，并进一步进行解析
-    # requestDict = json.loads(requestStr)
+    if request.method == 'GET':
+        requestStr = request.args.get("requestStr")
+    else:
+        requestStr = request.form.get("requestStr")
+
+    # 对参数格式进行转化：json->字典，并进一步进行解析
+    requestDict = json.loads(requestStr)
 
     a = datetime.now()
-    requestDict = {"userId": "1", "projectName": "订单分析", "columnNames": ["类别", "子类别", "客户名称"],
-                   "sourceCharacters": ["技术", "电话", "CraigReiter", "复印机"],
-                   "targetCharacters": ["技术copy", "电话copy", "CraigReitercopy", "复印机copy"]}
-    requestStr = str(requestDict)
+    ## 参数示例
+    # requestDict = {"userId": "1", "projectName": "订单分析", "columnNames": ["类别", "子类别", "客户名称"],
+    #                "sourceCharacters": ["技术", "电话", "CraigReiter", "复印机"],
+    #                "targetCharacters": ["技术copy", "电话copy", "CraigReitercopy", "复印机copy"]}
+    # requestStr = json.dumps(requestDict)
 
     projectName = requestDict['projectName']
     userId = '1'

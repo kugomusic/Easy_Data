@@ -52,21 +52,26 @@ def getOperateFlow():
     processflow = getProcessFlowByProjectId(project.id)
     operates = json.loads(processflow.operates)
     # print(operates)
-    for item in operates:
-        # print(item)
-        # print(item['type'])
-        # print(item['operate'])
-        if (item['type'] == '1'):
-            item['operate'] = parsingFilterParameters(item['operate'])
+    # for item in operates:
+    #     # print(item)
+    #     # print(item['type'])
+    #     # print(item['operate'])
+    #     if (item['type'] == '1'):
+    #         item['operate'] = parsingFilterParameters(item['operate'])
     print(operates)
     return operates
 
 
-# 重新执行处理流程
 @app.route("/executeAgain", methods=['POST'])
 def executeAgain():
+    """
+    重新执行处理流程（DAG）。
+    请求，判断这个节点的父节点是否执行完成，如果完成 拿父节点输出的数据 作为输入，处理后存储数据并标记该节点已经完成。
+    :return:
+    """
     projectName = request.form.get('projectName')
     userId = request.form.get('userId')
+    nodeId = request.form.get('nodeId') # 节点开始执行的
     project = getProjectByNameAndUserId(projectName, userId)
     # print(project)
     processflow = getProcessFlowByProjectId(project.id)
@@ -89,7 +94,6 @@ def executeAgain():
             # 过滤函数
             df = Process.filterCore(spark, df, condition)
             df.show()
-
 
     # 处理后的数据写入文件
     df.toPandas().to_csv("/home/zk/data/test.csv", header=True)

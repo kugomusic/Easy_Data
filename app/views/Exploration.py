@@ -1,14 +1,8 @@
 # -*- coding: UTF-8 -*-
-from flask import flash, get_flashed_messages, redirect, render_template, request, session, url_for, jsonify, Response, \
-    abort
+from flask import request, jsonify, Response
 from flask.json import jsonify
 from app import app
-from app import db
-from app.models.Mysql import DataSource, Project, initdb
-import shutil
-import json
-import os
-import time
+import json, os, shutil
 from app.Utils import mkdir, getProjectCurrentDataUrl
 import pandas as pd
 from app.ConstFile import const

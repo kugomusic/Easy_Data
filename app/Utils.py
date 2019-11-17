@@ -3,9 +3,18 @@ from app.models.Mysql import Project, ProcessFlow
 import os, json, time
 from app import db
 from pyspark.sql import SparkSession
-import uuid
-import traceback
+import uuid, shutil, traceback
 from flask.json import jsonify
+
+
+def list_str_to_list(str):
+    """
+    字符串数组
+    :param str:  "["1","2"]"
+    :return:
+    """
+    change = json.loads("{\"key\":" + str + "}")
+    return change['key']
 
 
 # 返回数据
@@ -24,10 +33,18 @@ def funTime():
 
 # 获取一个新的SparkSession
 def getSparkSession(userId, computationName):
+    appName = str(userId) + "_" + computationName + '_' + str(funTime())
+    print('Spark Session Name: ', appName)
+    # ss = SparkSession \
+    #     .builder \
+    #     .appName(appName) \
+    #     .master("spark://10.108.211.130:7077") \
+    #     .getOrCreate()
+
     ss = SparkSession \
         .builder \
-        .appName(userId + "_" + computationName + funTime) \
-        .master("spark://10.108.211.130:7077") \
+        .appName(appName) \
+        .master("local[*]") \
         .getOrCreate()
     return ss
 
@@ -121,10 +138,10 @@ def getProjectCurrentDataUrl(projectName):
         filters = {
             Project.project_name == projectName
         }
-        Pro = Project.query.filter(*filters).first()
-        ProjectAddress = Pro.project_address
+        pro = Project.query.filter(*filters).first()
+        project_address = pro.project_address
         filename = ''
-        for root, dirs, files in os.walk(ProjectAddress):
+        for root, dirs, files in os.walk(project_address):
             # print(root) #当前目录路径
             # print(dirs) #当前路径下所有子目录
             # print(files) #当前路径下所有非目录子文件
@@ -138,7 +155,7 @@ def getProjectCurrentDataUrl(projectName):
             return "error"
         else:
             # return {'fileUrl': ProjectAddress+'/'+filename, 'projectAddress': ProjectAddress}
-            return {'fileUrl': 'file://' + ProjectAddress + '/' + filename, 'projectAddress': ProjectAddress}
+            return {'fileUrl': 'file://' + project_address + '/' + filename, 'projectAddress': project_address}
     except:
         return "error"
 
@@ -149,14 +166,50 @@ def getProjectCurrentData(ss, projectName):
     urls = getProjectCurrentDataUrl(projectName)
     if urls == 'error':
         return "error: 项目名或项目路径有误"  # 错误类型：项目名或项目路径有误
-    fileUrl = urls['fileUrl']
+    fileUrl = urls['fileUrl']  # 读本地文件
     df = ss.read.csv(fileUrl, header=True, inferSchema=True)
+    # ss.
+    # import pandas as pd
+    # sc = ss.sparkContext
+    # sqlContext = SQLContext(sc)
+    # df = pd.read_csv(fileUrl)
+    # df = sqlContext.createDataFrame(df)
+
+    # df = sqlContext.read.format('com.databricks.spark.csv').options(header='true', inferschema='true').load(fileUrl)
     return df
 
 
-# 根据指定路径创建文件夹
+def read_data(ss, file_url):
+    """
+    读取数据
+    :param ss:
+    :param file_url:
+    :return:
+    """
+
+    df = ss.read.csv(file_url, header=True, inferSchema=True)
+    return df
+
+
+def save_data(df, file_url=""):
+    """
+    保存数据
+    :param df:
+    :param file_url:
+    :return:
+    """
+    if file_url == "":
+        file_url = '/home/zk/midData/' + str(uuid.uuid1()) + '.csv'
+    df.toPandas().to_csv(file_url, header=True, index=0)
+    return file_url
+
+
 def mkdir(path):
-    # 引入模块
+    """
+    根据指定路径创建文件夹
+    :param path:
+    :return:
+    """
     import os
 
     # 去除首位空格
@@ -190,6 +243,16 @@ def deldir(path):
         return True
     else:
         print('no such file:%s' % path)
+        return False
+
+
+def deltree(path):
+    import os
+    if os.path.exists(path):
+        shutil.rmtree(path)  # 递归删除文件夹
+        return True
+    else:
+        print('no such path:%s' % path)
         return False
 
 
