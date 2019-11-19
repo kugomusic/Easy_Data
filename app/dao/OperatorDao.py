@@ -8,7 +8,7 @@ operator（算子）表 增删改查
 """
 
 
-def update_operator_by_id(operator_id, status, operator_output_url, run_info):
+def update_operator_by_id(operator_id, status, operator_output_url="", run_info=""):
     """
     通过 operator_id 更新 operator的执行状态、结果保存路径、运行信息
     :param operator_id:
@@ -60,6 +60,21 @@ def get_operator_by_id(operator_id):
     """
     try:
         query = db.session.query(Operator).filter(Operator.id == operator_id).first()
+        db.session.commit()
+        return query
+    except Exception:
+        print(traceback.print_exc())
+        return False
+
+
+def get_operator_by_ids(operator_ids):
+    """
+    通过 id集合 查询 operator
+    :param operator_ids:[]
+    :return:
+    """
+    try:
+        query = db.session.query(Operator).filter(Operator.id in operator_ids)
         db.session.commit()
         return query
     except Exception:

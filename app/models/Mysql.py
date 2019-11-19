@@ -111,3 +111,18 @@ class Operator(db.Model):
     operator_config = db.Column(db.String(4096))
     operator_style = db.Column(db.String(4096))
     run_info = db.Column(db.String(8192))
+
+
+class ModelExecute(db.Model):
+    """
+    模型执行记录表
+    """
+    __tablename__ = 'model_execute'
+    id = db.Column(db.Integer, primary_key=True)
+    model_id = db.Column(db.Integer)
+    start_nodes = db.Column(db.String(2048))
+    status = db.Column(db.String(32))
+    execute_user_id = db.Column(db.Integer)
+    run_info = db.Column(db.String(4096))
+    create_time = db.Column(db.String(32))
+    end_time = db.Column(db.String(32))

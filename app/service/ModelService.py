@@ -3,7 +3,8 @@
 import app.dao.ModelDao as ModelDao
 import app.dao.OperatorDao as OperatorDao
 import app.dao.OperatorTypeDao as OperatorTypeDao
-from app.models.Mysql import Operator
+import app.dao.ModelExecuteDao as ModelExecuteDao
+from app.models.Mysql import Operator, ModelExecute
 import app.service.ModelExecuteService as ModelExecuteService
 from app.Utils import *
 
@@ -105,12 +106,52 @@ def get_model_by_project_id(project_id):
             'relationship': relationship, 'config_order': config_order}
 
 
-def get_run_status_by_project_id(project_id, operator_id=None):
+def get_status_model_execute_end(project_id, start_operator_ids):
+    """
+    获取运行结束后的状态
+
+    :param project_id:
+    :param start_operator_ids:
+    :return:
+    """
+    # 获取 model
+    model = ModelDao.get_model_by_project_id(project_id)
+    if model is False:
+        return False
+
+    # 获取 operator
+    operators = OperatorDao.get_operator_by_model_id(model.id)
+    if operators is False:
+        return False
+
+    # 构造dict
+    id_operator_dict = {}
+    for operator in operators:
+        id_operator_dict[operator.id] = operator
+
+    operator_from_one_ids = []
+    operator_from_one_ids.extend(start_operator_ids)
+
+    # 从此次执行 起始节点及以后节点的状态
+    status_set = set()
+    while operator_from_one_ids:
+        item = operator_from_one_ids.pop(0)
+        if not (item is None or item == ''):
+            status_set.add(id_operator_dict[item].status)
+            operator_from_one_ids.extend(id_operator_dict[item].child_operator_ids.split(','))
+
+    if len(status_set) == 1 and "success" in status_set:
+        return "success"
+    else:
+        return "error"
+
+
+def get_run_status_by_project_id(project_id, model_execute_id):
     """
     获取某次执行的状态和其中的每个算子的状态
 
     :param project_id:
-    :param operator_id: 从某个算子开始 此次执行的整体状态 。如果是空 ，默认查询整个model的执行状态
+    :param model_execute_id: model的执行记录ID
     :return:
     """
 
@@ -124,89 +165,111 @@ def get_run_status_by_project_id(project_id, operator_id=None):
     if operators is False:
         return False
 
-    # operator_status返回结果
-    result = dict()
-    for operator in operators:
-        result[operator.id] = {"status": operator.status, "log": operator.run_info}
-
     # 构造dict
     id_operator_dict = {}
     for operator in operators:
         id_operator_dict[operator.id] = operator
 
-    status_set = set()
+    # 查看此次执行记录（状态、起始节点）
+    model_execute_ = ModelExecuteDao.get_model_execute_by_id(model_execute_id)
+    operator_from_one_ids = model_execute_.start_nodes.split(',')
 
-    # queue
-    if operator_id is None:
-        operator_from_one_ids = model.start_nodes.split(',')
-    else:
-        operator_from_one_ids = [operator_id]
-
-    # 12222
+    # 查看此次执行的所有节点的状态
+    result = dict()
     while operator_from_one_ids:
         item = operator_from_one_ids.pop(0)
         if not (item is None or item == ''):
-            status_set.add(id_operator_dict[item].status)
-            operator_from_one_ids.extend(operator.child_operator_ids.split(','))
+            result[id_operator_dict[item].id] = {"status": id_operator_dict[item].status,
+                                                 "log": id_operator_dict[item].run_info}
+            operator_from_one_ids.extend(id_operator_dict[item].child_operator_ids.split(','))
 
+    return {"modelExecuteStatus": model_execute_.status, "operatorStatus": result}
+
+
+def run_execute_status_from_start(user_id, project_id):
     """
-    有running，model running 
-    没有running，有error, model error
-    全部success，model success
-    
-    """
-
-    for operator in operators:
-        status_set.add(operator.status)
-
-    if 'running' in status_set:
-        model_execute_status = 'running'
-    elif 'error' in status_set:
-        # TODO:多棵树的时候 有的树是error 有的是initial 可能存在这种情况
-        model_execute_status = 'error'
-    elif ('initial' in status_set) and ('success' not in status_set):
-        model_execute_status = 'initial'
-    elif ('initial' in status_set) and ('success' in status_set):
-        model_execute_status = 'running'
-    else:
-        model_execute_status = 'success'
-
-    return {"modelExecuteStatus": model_execute_status, "operatorStatus": result}
-
-
-def model_execute_from_start(user_id, project_id):
-    """
-    执行模型
-    :param user_id: 1
-    :param project_id: 32
+    设置模型运行时状态(从头开始执行)
+    :param user_id:
+    :param project_id:
     :return:
     """
     # 获取 model
     model = ModelDao.get_model_by_project_id(project_id)
     if model is False:
         return False
-
-    # spark会话
-    spark_session = getSparkSession(user_id, "executeAll")
-
-    # 多线程执行
+    # 状态初始化
     start_nodes = model.start_nodes.split(',')
-    print("-----model_execute_from_start------", "start_nodes", ','.join(start_nodes))
-    ModelExecuteService.model_thread_execute(spark_session, start_nodes)
+    model_execute_id = initial_execute_status(user_id, start_nodes)
+    ModelExecuteDao.update_model_execute(model_execute_id, "running", "", "")
+    return {'model_execute_id': model_execute_id, 'start_nodes': start_nodes}
 
 
-def model_execute_from_one(user_id, operator_id):
+def run_execute_status_from_one(user_id, operator_id):
+    """
+    设置模型运行时状态（从某个节点开始执行）
+    :param user_id:
+    :param operator_id:
+    :return:
+    """
+    # 状态初始化
+    start_nodes = [operator_id]
+    model_execute_id = initial_execute_status(user_id, start_nodes)
+    ModelExecuteDao.update_model_execute(model_execute_id, "running", "", "")
+    return {'model_execute_id': model_execute_id, 'start_nodes': start_nodes}
+
+
+def model_execute(user_id, project_id, param):
     """
     执行模型
     :param user_id: 1
-    :param operator_id: 1
+    :param project_id: 32
+    :param param: {'model_execute_id': model_execute_id, 'start_nodes': start_nodes}
     :return:
     """
-
+    model_execute_id = param['model_execute_id']
+    start_nodes = param['start_nodes']
     # spark会话
-    spark_session = getSparkSession(user_id, "executeFromOne")
-
+    spark_session = getSparkSession(user_id, "executeModel")
     # 多线程执行
-    start_nodes = [operator_id]
-    print("-----model_execute_from_one------", "start_nodes", ','.join(start_nodes))
+    print("-----model_execute_from_start------", "start_nodes", ','.join(start_nodes))
     ModelExecuteService.model_thread_execute(spark_session, start_nodes)
+    # 执行完毕，更改执行状态
+    end_status = get_status_model_execute_end(project_id, start_nodes)
+    ModelExecuteDao.update_model_execute(model_execute_id, end_status, "",
+                                         time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    return model_execute_id
+
+
+def initial_execute_status(execute_user_id, start_nodes):
+    """
+    每次执行model时，初始化执行状态
+    :param execute_user_id:
+    :param start_nodes: []
+    :return:
+    """
+    # 查找参与运行的 operator
+    operator_list = []
+    operator_id_queue = []
+    for x in start_nodes:
+        operator_id_queue.append(x)
+    while len(operator_id_queue) > 0:
+        operator_id = operator_id_queue.pop(0)
+        if operator_id is None or operator_id == "":
+            continue
+        operator = OperatorDao.get_operator_by_id(operator_id)
+        operator_list.append(operator)
+        for x in operator.child_operator_ids.split('*,'):
+            operator_id_queue.append(x)
+
+    # 每个operator 状态初始化为initial
+    for operator in operator_list:
+        OperatorDao.update_operator_by_id(operator.id, "initial")
+
+    # 追加执行记录
+    model_execute = ModelExecute(start_nodes=','.join(start_nodes), status='initial', execute_user_id=execute_user_id,
+                                 create_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    model_execute = ModelExecuteDao.create_model_execute(model_execute)
+    if model_execute is False:
+        return False
+    else:
+        return model_execute.id
