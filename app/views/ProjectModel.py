@@ -52,14 +52,14 @@ def update_flow():
     新建 处理流程
     :return:
     """
-    userId = request.form.get('userId')
+    user_id = request.form.get('userId')
     project_id = request.form.get('projectId')
     config = request.form.get('config')
     start_nodes = request.form.get('startNode')
     relationship = request.form.get('relationship')
     config_order = request.form.get('configOrder')
 
-    print(userId, project_id, config, start_nodes, relationship, config_order)
+    print('---------', user_id, project_id, config, start_nodes, relationship, config_order)
     # 更新 model（流程图）
     result = ModelService.update_model(project_id, start_nodes, config, relationship, config_order)
 

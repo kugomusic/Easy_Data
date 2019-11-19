@@ -13,7 +13,9 @@ def list_str_to_list(str):
     :param str:  "["1","2"]"
     :return:
     """
-    change = json.loads("{\"key\":" + str + "}")
+    if str is None or str == '':
+        return {}
+    change = json.loads("{\"key\":" + str.replace("'", "\"") + "}")
     return change['key']
 
 

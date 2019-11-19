@@ -15,6 +15,7 @@ def model_thread_execute(spark_session, start_nodes):
     :return:
     """
 
+    # TODO: 新建记录表，用于存储每次执行的总 状态
     class MyThread(threading.Thread):
         def __init__(self, threadID, name, q):
             threading.Thread.__init__(self)

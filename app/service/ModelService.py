@@ -81,6 +81,8 @@ def get_model_by_project_id(project_id):
     if operator_types is False:
         return False
 
+    # TODO : 查询数据源表
+
     operator_types_dict = dict()
     for operator_type in operator_types:
         operator_types_dict[operator_type.id] = operator_type
@@ -88,15 +90,17 @@ def get_model_by_project_id(project_id):
     # 返回结果
     config = dict()
     for operator in operators:
-        config[operator.id] = {'type': operator_types_dict[operator.operator_type_id].type_label,
-                               'name': operator_types_dict[operator.operator_type_id].type_name,
+        config[operator.id] = {'type': operator_types_dict[operator.operator_type_id].type_name,
+                               'name': operator_types_dict[operator.operator_type_id].id,
                                'location': json.loads(operator.operator_style)['location'],
                                'config': json.loads(operator.operator_config),
                                'next': operator.child_operator_ids.split(','),
                                "pre": operator.father_operator_ids.split(',')}
     model_config = json.loads(model.config)
-    relationship = model_config['relationship'].split('*,')
-    config_order = model_config['config_order']
+    relationship = []
+    for item in model_config['relationship'].split('*,'):
+        relationship.append(list_str_to_list(item))
+    config_order = json.loads(model_config['config_order'])
     return {'projectId': project_id, 'config': config, 'startNode': model.start_nodes.split(','),
             'relationship': relationship, 'config_order': config_order}
 
@@ -160,7 +164,9 @@ def get_run_status_by_project_id(project_id, operator_id=None):
     elif 'error' in status_set:
         # TODO:多棵树的时候 有的树是error 有的是initial 可能存在这种情况
         model_execute_status = 'error'
-    elif 'initial' in status_set:
+    elif ('initial' in status_set) and ('success' not in status_set):
+        model_execute_status = 'initial'
+    elif ('initial' in status_set) and ('success' in status_set):
         model_execute_status = 'running'
     else:
         model_execute_status = 'success'

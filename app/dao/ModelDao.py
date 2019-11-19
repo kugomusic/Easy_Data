@@ -35,7 +35,11 @@ def update_with_project_id(project_id, start_nodes, relationship, config_order):
     try:
         start_nodes = utils.list_str_to_list(start_nodes)
         relationship = utils.list_str_to_list(relationship)
-        config = json.dumps({'config_order': config_order, 'relationship': '*,'.join(relationship)}, ensure_ascii=False)
+        relationship_item_str = []
+        for item in relationship:
+            relationship_item_str.append(str(item))
+        config = json.dumps({'config_order': config_order, 'relationship': '*,'.join(relationship_item_str)},
+                            ensure_ascii=False)
         query = db.session.query(Model)
         query.filter(Model.project_id == project_id).update(
             {Model.start_nodes: ','.join(start_nodes),
