@@ -155,7 +155,7 @@ def get_column_names():
 
     try:
         data = pd.read_csv(fileUrl, encoding='utf-8')
-        return data.columns.values.tolist()
+        return jsonify(data.columns.values.tolist())
     except:
         return "error read"
 
@@ -178,7 +178,7 @@ def get_column_names_with_number_type():
         for col in data.columns.values.tolist():
             if (data[col].dtype == 'int64' or data[col].dtype == 'float64'):
                 res.append(col)
-        return res
+        return jsonify(res)
     except:
         return "error read"
 

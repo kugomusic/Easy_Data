@@ -31,7 +31,7 @@ def update_flow():
     relationship = request.form.get('relationship')
     config_order = request.form.get('configOrder')
 
-    print('---------', user_id, project_id, config, start_nodes, relationship, config_order)
+    print('------updateFlow', user_id, project_id, config, start_nodes, relationship, config_order)
     # 更新 model（流程图）
     result = ModelService.update_model(project_id, start_nodes, config, relationship, config_order)
 

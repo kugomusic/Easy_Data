@@ -1,0 +1,21 @@
+
+#数据源 过滤 排序
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"data2" :{"type" : "data","name" : 5001,"location" : {"x":"12px", "y":"23px"},"config" : {"fileId" : 2,"fileUrl" : [{"data2":"/home/zk/data/订单信息.csv"}]},"next" : ["pre1"],"pre" : []},"exp1" : {"type" : "exploration","name" : 1001,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" : {"userId":"1","projectId":32,"parameter":[{"colName":"利润", "operate":">", "value":"100", "relation":"AND"},{"colName":"装运方式", "operate":"==", "value":"一级", "relation":""}]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]},"pre1" : {"type" : "preprocess","name" : 1002,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter":{"userId": "1", "projectId": 32, "columnName": "利润", "sortType": "升序"},"fileUrl":[{"data2":0}]},"next" : [],"pre" : ["data2"]}}
+
+# 排序
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 1002,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" : {"userId":"1","projectId":32,"parameter":{"userId":1,"projectId":32,"columnName":"利润","sortType":"降序"}},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+#数据列拆分
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 1003,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" : {"userId": 1, "projectId": 32, "columnName": "订购日期", "delimiter": "/", "newColumnNames": ["year", "月"]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 数据列合并
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 1005,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" : {"userId": 1, "projectId": 32, "columnNames": ["类别", "子类别", "产品名称"], "connector": "-", "newColumnName": "品类名称"},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 替换
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 1006,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" : {"userId": 1, "projectId": 32, "columnNames": ["类别", "子类别", "客户名称"],"replaceCharacters":[{"source":"技术","target":"技术copy"},{"source":"电话","target":"电话copy"}]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+#填充空值
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 1007,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" : {"userId":1,"projectId":32,"parameter":[{"operate":"均值填充","colName":"利润"},{"operate":"均值填充","colName":"数量"}]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 列映射
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 1008,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":1,"projectId":32,"parameter":[{"colName_1":"利润", "operate_1":"+","value_1":"100","operate":"+","colName_2":"数量", "operate_2":"*","value_2":"0.0001","newName":"newCol1"},{"colName_1":"利润", "operate_1":"+","value_1":"10","operate":"*","colName_2":"数量", "operate_2":"*","value_2":"0.1","newName":"newCol2"}]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}

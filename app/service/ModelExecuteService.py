@@ -122,17 +122,33 @@ def operator_execute(spark_session, operator_id):
                 father_output_url_index = file_url_dict[key]
                 father_url_arr = father.operator_output_url.split('*,')
                 url_arr.append(father_url_arr[father_output_url_index])
-
+        # 算子函数
         if operator.operator_type_id == 1001:
             preprocessService.filter_multi_conditions(spark_session, operator_id, url_arr[0],
                                                       json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 1002:
             preprocessService.sort(spark_session, operator_id, url_arr[0],
                                    json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 1003:
+            preprocessService.column_split(spark_session, operator_id, url_arr[0],
+                                           json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 1005:
+            preprocessService.columns_merge(spark_session, operator_id, url_arr[0],
+                                            json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 1006:
+            preprocessService.replace(spark_session, operator_id, url_arr[0],
+                                      json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 1007:
+            preprocessService.fill_null_value(spark_session, operator_id, url_arr[0],
+                                              json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 1008:
+            preprocessService.column_map(spark_session, operator_id, url_arr[0],
+                                         json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 5001:
             preprocessService.read_data_with_update_record(spark_session, operator_id, url_arr[0])
-        print('----------------', operator.operator_type_id == 5001)
+
         return operator.child_operator_ids.split(',')
+
     except:
         traceback.print_exc()
         return False
