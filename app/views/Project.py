@@ -27,6 +27,17 @@ class MyResponse(Response):
 app.response_class = MyResponse
 
 
+@app.route('/project/testList', methods=['GET', 'POST'])
+def test_list():
+    """
+    获取项目列表
+    :return:
+    """
+    result = []
+
+    return jsonify(result)
+
+
 @app.route('/project/getAll', methods=['GET', 'POST'])
 def get_all():
     """
@@ -37,7 +48,7 @@ def get_all():
     result = []
     for i in data_sources:
         result.append({"id": i.id, "name": i.project_name})
-    return result
+    return jsonify(result)
 
 
 @app.route('/project/create', methods=['GET', 'POST'])
@@ -89,4 +100,3 @@ def create():
             return "Double name"
     except:
         return "error"
-

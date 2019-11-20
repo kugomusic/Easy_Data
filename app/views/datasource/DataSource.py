@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from flask import request, url_for, send_from_directory, Response
+from flask import request, send_from_directory, Response
 from app.views.datasource.werkzeug.utils import secure_filename
 from app import app, db
 from app.models.Mysql import DataSource
@@ -9,18 +9,6 @@ from sqlalchemy.sql import and_, or_, text
 from flask.json import jsonify
 import json
 import pandas as pd
-
-
-# 解决 list, dict 不能返回的问题
-class MyResponse(Response):
-    @classmethod
-    def force_type(cls, response, environ=None):
-        if isinstance(response, (list, dict)):
-            response = jsonify(response)
-        return super(Response, cls).force_type(response, environ)
-
-
-app.response_class = MyResponse
 
 ALLOWED_EXTENSIONS = set(['txt', 'csv', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
@@ -36,6 +24,18 @@ html = '''
          <input type=submit value=上传>
     </form>
     '''
+
+
+# 解决 list, dict 不能返回的问题
+class MyResponse(Response):
+    @classmethod
+    def force_type(cls, response, environ=None):
+        if isinstance(response, (list, dict)):
+            response = jsonify(response)
+        return super(Response, cls).force_type(response, environ)
+
+
+app.response_class = MyResponse
 
 
 def allowed_file(filename):
@@ -99,7 +99,7 @@ def get_file():
     for i in dataSource:
         result.append({"fileId": i.id, "fileName": i.file_name, 'fileUrl': i.file_url, 'fileType': i.file_type,
                        'createUser': i.create_user, 'openLevel': i.open_level, 'createTime': i.create_time})
-    return result
+    return jsonify(result)
 
 
 def add_DataSource(file_name, file_url, file_type, create_user, open_level, create_time):
