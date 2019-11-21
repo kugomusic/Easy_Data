@@ -19,3 +19,6 @@
 
 # 列映射
 {"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 1008,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":1,"projectId":32,"parameter":[{"colName_1":"利润", "operate_1":"+","value_1":"100","operate":"+","colName_2":"数量", "operate_2":"*","value_2":"0.0001","newName":"newCol1"},{"colName_1":"利润", "operate_1":"+","value_1":"10","operate":"*","colName_2":"数量", "operate_2":"*","value_2":"0.1","newName":"newCol2"}]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+
+

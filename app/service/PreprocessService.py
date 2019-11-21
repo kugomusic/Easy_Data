@@ -51,7 +51,6 @@ def filter_multi_conditions(spark_session, operator_id, file_url, condition):
 
     try:
 
-        # condition_dict = json.loads(condition)
         # 修改计算状态
         OperatorDao.update_operator_by_id(operator_id, 'running', '', '')
         # 读取数据
@@ -80,12 +79,9 @@ def filter_core(spark, df, condition):
     :param condition:
     :return:
     """
+
     table_name = ''.join(random.sample(string.ascii_letters + string.digits, 8))
     sql_str = 'select * from ' + table_name + ' where'
-    # types = {}
-    # for i in df.dtypes:
-    #     types[i[0]] = i[1]
-    #     print(i)
     for i in condition:
         if is_number(i['value']):
             sql_str = sql_str + ' `' + i['colName'] + '` ' + i['operate'] + ' ' + i['value'] + ' ' + i['relation']
