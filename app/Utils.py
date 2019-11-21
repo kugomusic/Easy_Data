@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-from app.models.Mysql import Project, ProcessFlow
+from app.models.MSEntity import Project, ProcessFlow
 import os, json, time
 from app import db
 from pyspark.sql import SparkSession

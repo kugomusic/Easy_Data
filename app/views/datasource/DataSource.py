@@ -3,7 +3,7 @@ import os
 from flask import request, send_from_directory, Response
 from app.views.datasource.werkzeug.utils import secure_filename
 from app import app, db
-from app.models.Mysql import DataSource
+from app.models.MSEntity import DataSource
 from sqlalchemy.sql import and_, or_, text
 
 from flask.json import jsonify

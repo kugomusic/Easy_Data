@@ -1,5 +1,5 @@
 # encoding=utf8
-from app.models.Mysql import OperatorType
+from app.models.MSEntity import OperatorType
 
 """
 operator_type（算子种类）表 增删改查

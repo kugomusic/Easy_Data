@@ -1,5 +1,5 @@
 # encoding=utf8
-from app.models.Mysql import Operator
+from app.models.MSEntity import Operator
 from app import db
 import traceback
 

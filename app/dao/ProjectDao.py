@@ -1,5 +1,5 @@
 # encoding=utf8
-from app.models.Mysql import Project
+from app.models.MSEntity import Project
 
 """
 提供 project（项目） 表的增删改查

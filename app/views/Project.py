@@ -8,7 +8,7 @@ from flask import request, jsonify, Response
 from flask.json import jsonify
 from app import app
 from app import db
-from app.models.Mysql import DataSource, Project, Model
+from app.models.MSEntity import DataSource, Project, Model
 import os
 from app.Utils import mkdir, getProjectByNameAndUserId
 from app.ConstFile import const

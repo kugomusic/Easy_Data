@@ -4,7 +4,7 @@ import app.dao.ModelDao as ModelDao
 import app.dao.OperatorDao as OperatorDao
 import app.dao.OperatorTypeDao as OperatorTypeDao
 import app.dao.ModelExecuteDao as ModelExecuteDao
-from app.models.Mysql import Operator, ModelExecute
+from app.models.MSEntity import Operator, ModelExecute
 import app.service.ModelExecuteService as ModelExecuteService
 from app.Utils import *
 

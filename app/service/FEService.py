@@ -28,11 +28,12 @@ def quantile_discretization(spark_session, operator_id, file_url, condition):
         # 读取数据
         df = read_data(spark_session, file_url)
         # 分位数离散化函数
-        result_df = quantile_discretization_core(df, condition['parameter'])
+        result_df = quantile_discretization_core(df, condition)
         if isinstance(result_df, str):
             OperatorDao.update_operator_by_id(operator_id, 'error', '', result_df)
         else:
             # 存储结果
+            result_df.show()
             result_file_url = save_data(result_df)
             run_info = '分位数离散化算子执行成功'
             # 修改计算状态
@@ -100,11 +101,12 @@ def vector_indexer(spark_session, operator_id, file_url, condition):
         # 读取数据
         df = read_data(spark_session, file_url)
         # 向量索引转换函数
-        result_df = vector_indexer_core(df, condition['parameter'])
+        result_df = vector_indexer_core(df, condition)
         if isinstance(result_df, str):
             OperatorDao.update_operator_by_id(operator_id, 'error', '', result_df)
         else:
             # 存储结果
+            result_df.show()
             result_file_url = save_data(result_df)
             run_info = '向量索引转换化算子执行成功'
             # 修改计算状态
@@ -123,7 +125,7 @@ def vector_indexer_core(df, condition):
     向量索引转换主函数, 将向量转换成标签索引格式，加入新列；返回df(spark格式)
 
     :param df:
-    :param condition: {"userId":"1","projectName":"订单分析","columnName":"装运成本","newColumnName":"向量索引转换结果","maxCategories":50}
+    :param condition: {"userId":1,"projectId":32,"columnNames":["装运成本"],"newColumnName":"向量索引转换结果","maxCategories":50}
     参数中指定分类标准maxCategories, 默认为20（maxCategories是一个阈值，如[1.0, 2.0, 2.5]的categories是3，小于20，属于分类类型；否则为连续类型）
     :return:
     """
@@ -181,7 +183,7 @@ def standard_scaler(spark_session, operator_id, file_url, condition):
         # 读取数据
         df = read_data(spark_session, file_url)
         # 标准化函数
-        result_df = standard_scaler_core(df, condition['parameter'])
+        result_df = standard_scaler_core(df, condition)
         if isinstance(result_df, str):
             OperatorDao.update_operator_by_id(operator_id, 'error', '', result_df)
         else:
@@ -203,7 +205,7 @@ def standard_scaler_core(df, condition):
     """
     标准化列主函数, 标准化列，使其拥有零均值和等于1的标准差；返回df(spark格式)
     :param df:
-    :param condition: {"projectName":"订单分析","columnName":"利润","newColumnName":"利润(标准化)"}
+    :param condition: {"projectId":32,"columnNames":["利润"],"newColumnName":"利润(标准化)"}
     :return:
     """
     column_names = condition['columnNames']
@@ -255,11 +257,12 @@ def pca(spark_session, operator_id, file_url, condition):
         # 读取数据
         df = read_data(spark_session, file_url)
         # 降维函数
-        result_df = pca_core(df, condition['parameter'])
+        result_df = pca_core(df, condition)
         if isinstance(result_df, str):
             OperatorDao.update_operator_by_id(operator_id, 'error', '', result_df)
         else:
             # 存储结果
+            result_df.show()
             result_file_url = save_data(result_df)
             run_info = '降维算子执行成功'
             # 修改计算状态
@@ -277,7 +280,7 @@ def pca_core(df, condition):
     """
     降维主函数, PCA训练一个模型将向量投影到前k个主成分的较低维空间；返回df(spark格式)
     :param df:
-    :param condition: {"userId":"1";"projectName":"订单分析","columnNames":["销售额","数量","折扣","利润","装运成本"],"newColumnName":"降维结果","k":4}
+    :param condition: {"userId":1,"projectId":32,"columnNames":["销售额","数量","折扣","利润","装运成本"],"newColumnName":"降维结果","k":4}
     :return:
     """
     column_names = condition['columnNames']
@@ -341,7 +344,7 @@ def string_indexer(spark_session, operator_id, file_url, condition):
         # 读取数据
         df = read_data(spark_session, file_url)
         # 字符串转标签函数
-        result_df = string_indexer_core(df, condition['parameter'])
+        result_df = string_indexer_core(df, condition)
         if isinstance(result_df, str):
             OperatorDao.update_operator_by_id(operator_id, 'error', '', result_df)
         else:
@@ -365,7 +368,7 @@ def string_indexer_core(df, condition):
     # 按label出现的频次，转换成0～分类个数-1，频次最高的转换为0，以此类推；如果输入的列类型为数值型，则会先转换成字符串型，再进行标签化
 
     :param df:
-    :param condition: {"userId":1,"projectName":"订单分析","columnName":"客户名称","newColumnName":"客户名称(标签化，按频率排序，0为频次最高)"}
+    :param condition: {"userId":1,"projectId":32,"columnName":"客户名称","newColumnName":"客户名称(标签化，按频率排序，0为频次最高)"}
     :return:
     """
     column_name = condition['columnName']
@@ -387,7 +390,7 @@ def one_hot_encoder(spark_session, operator_id, file_url, condition):
     :param spark_session:
     :param operator_id:
     :param file_url:
-    :param condition:
+    :param condition:{"userId":1,"projectId":32,"columnNames":["数量","数量"],"newColumnNames":["独热编码1","独热编码2"]}
     :return:
     """
 
@@ -397,7 +400,7 @@ def one_hot_encoder(spark_session, operator_id, file_url, condition):
         # 读取数据
         df = read_data(spark_session, file_url)
         # 独热编码函数
-        result_df = one_hot_encoder_core(df, condition['parameter'])
+        result_df = one_hot_encoder_core(df, condition)
         if isinstance(result_df, str):
             OperatorDao.update_operator_by_id(operator_id, 'error', '', result_df)
         else:
@@ -455,7 +458,7 @@ def polynomial_expansion(spark_session, operator_id, file_url, condition):
         # 读取数据
         df = read_data(spark_session, file_url)
         # 多项式扩展函数
-        result_df = polynomial_expansion_core(df, condition['parameter'])
+        result_df = polynomial_expansion_core(df, condition)
         if isinstance(result_df, str):
             OperatorDao.update_operator_by_id(operator_id, 'error', '', result_df)
         else:
@@ -479,7 +482,7 @@ def polynomial_expansion_core(df, condition):
     # 功能说明：以degree为2的情况为例，输入为(x,y), 则输出为(x, x * x, y, x * y, y * y)
     # 为了更加直观，举个带数字的例子，[0.5, 2.0] -> [0.5, 0.25, 2.0, 1.0, 4.0]
     :param df:
-    :param condition: {"projectName":"订单分析","columnNames":"数量,折扣,装运成本","newColumnName":"多项式扩展"}
+    :param condition: {"projectId":32,"columnNames":["数量","折扣","装运成本"],"newColumnName":"多项式扩展"}
     :return:
     """
     column_names = condition['columnNames']
@@ -531,7 +534,7 @@ def chiSqSelector(spark_session, operator_id, file_url, condition):
         # 读取数据
         df = read_data(spark_session, file_url)
         # 卡方选择函数
-        result_df = chiSqSelector_core(df, condition['parameter'])
+        result_df = chiSqSelector_core(df, condition)
         if isinstance(result_df, str):
             OperatorDao.update_operator_by_id(operator_id, 'error', '', result_df)
         else:
@@ -555,7 +558,7 @@ def chiSqSelector_core(df, condition):
     # 对特征和真实标签label之间进行卡方检验，来判断该特征和真实标签的关联程度，进而确定是否对其进行选择
     # 对于label的选择，理论上来说要选择机器学习的目标列（若该列不是数值型，需将其数值化），但是无相应数据，本例中选择label="数量"，无实际意义
     :param df:
-    :param condition: {"userId":"1","projectName":"订单分析","columnNames":"折扣,装运成本","columnName_label":"数量","newColumnName":"卡方选择","numTopFeatures":2}
+    :param condition: {"userId":"1","projectId":"订单分析","columnNames":["折扣","装运成本"],"columnName_label":"数量","newColumnName":"卡方选择","numTopFeatures":2}
     :return:
     """
     column_names = condition['columnNames']

@@ -8,7 +8,7 @@ from flask import request, jsonify, Response
 from flask.json import jsonify
 from app import app
 from app import db
-from app.models.Mysql import DataSource, Project, ProcessFlow, initdb
+from app.models.MSEntity import DataSource, Project, ProcessFlow, initdb
 import shutil
 import json
 import pandas as pd

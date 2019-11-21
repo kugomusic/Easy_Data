@@ -20,5 +20,30 @@
 # 列映射
 {"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 1008,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":1,"projectId":32,"parameter":[{"colName_1":"利润", "operate_1":"+","value_1":"100","operate":"+","colName_2":"数量", "operate_2":"*","value_2":"0.0001","newName":"newCol1"},{"colName_1":"利润", "operate_1":"+","value_1":"10","operate":"*","colName_2":"数量", "operate_2":"*","value_2":"0.1","newName":"newCol2"}]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
 
+# 分位数离散化
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 2001,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":1,"projectId":32,"columnName":"装运成本","newColumnName":"装运成本(分位数离散化)","numBuckets":10},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 向量索引
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 2002,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":1,"projectId":32,"columnNames":["装运成本"],"newColumnName":"向量索引转换结果","maxCategories":50},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 标准化
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 2003,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"projectId":32,"columnNames":["利润"],"newColumnName":"利润(标准化)"},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# pca
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 2004,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":1,"projectId":32,"columnNames":["销售额","数量","折扣","利润","装运成本"],"newColumnName":"降维结果","k":4},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 字符串转标签
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 2005,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":1,"projectId":32,"columnName":"客户名称","newColumnName":"客户名称(标签化，按频率排序，0为频次最高)"},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 独热编码
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 2006,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":1,"projectId":32,"columnNames":["数量","数量"],"newColumnNames":["独热编码1","独热编码2"]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 多项式扩展
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 2007,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"projectId":32,"columnNames":["数量","折扣","装运成本"],"newColumnName":"多项式扩展"},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 卡方选择
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 2008,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":"1","projectId":"订单分析","columnNames":["折扣","装运成本"],"columnName_label":"数量","newColumnName":"卡方选择","numTopFeatures":2},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+
 
 

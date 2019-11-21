@@ -1,5 +1,5 @@
 # encoding=utf8
-from app.models.Mysql import Model
+from app.models.MSEntity import Model
 from app import db
 import traceback
 import json
