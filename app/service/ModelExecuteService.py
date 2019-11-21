@@ -3,6 +3,7 @@ import time
 import queue
 import threading
 import traceback
+import app.service.FEService as FEService
 import app.service.PreprocessService as preprocessService
 import app.dao.OperatorDao as OperatorDao
 
@@ -143,6 +144,30 @@ def operator_execute(spark_session, operator_id):
         elif operator.operator_type_id == 1008:
             preprocessService.column_map(spark_session, operator_id, url_arr[0],
                                          json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 2001:
+            FEService.quantile_discretization(spark_session, operator_id, url_arr[0],
+                                              json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 2002:
+            FEService.vector_indexer(spark_session, operator_id, url_arr[0],
+                                     json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 2003:
+            FEService.standard_scaler(spark_session, operator_id, url_arr[0],
+                                      json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 2004:
+            FEService.pca(spark_session, operator_id, url_arr[0],
+                          json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 2005:
+            FEService.string_indexer(spark_session, operator_id, url_arr[0],
+                                     json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 2006:
+            FEService.one_hot_encoder(spark_session, operator_id, url_arr[0],
+                                      json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 2007:
+            FEService.polynomial_expansion(spark_session, operator_id, url_arr[0],
+                                           json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 2008:
+            FEService.chiSqSelector(spark_session, operator_id, url_arr[0],
+                                    json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 5001:
             preprocessService.read_data_with_update_record(spark_session, operator_id, url_arr[0])
 

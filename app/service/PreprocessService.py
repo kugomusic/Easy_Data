@@ -66,7 +66,7 @@ def filter_multi_conditions(spark_session, operator_id, file_url, condition):
         return [result_file_url]
     except Exception as e:
         run_info = str(e)
-        OperatorDao.update_operator_by_id(operator_id, 'error', result_file_url, run_info)
+        OperatorDao.update_operator_by_id(operator_id, 'error', '', run_info)
         traceback.print_exc()
         return []
 
