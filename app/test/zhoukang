@@ -44,6 +44,14 @@
 # 卡方选择
 {"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 2008,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"userId":"1","projectId":"订单分析","columnNames":["折扣","装运成本"],"columnName_label":"数量","newColumnName":"卡方选择","numTopFeatures":2},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
 
+# 全表统计
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 3001,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"projectId": 32, "columnNames": ["利润"]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 频率统计
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 3002,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"projectId":32,"columnName":"类别"},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+# 相关系数
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 3003,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"projectId": 32, "columnNames": ["销售额", "折扣", "装运成本"]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
 
 
 

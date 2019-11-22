@@ -5,6 +5,7 @@ import threading
 import traceback
 import app.service.FEService as FEService
 import app.service.PreprocessService as preprocessService
+import app.service.ExplorationService as ExplorationService
 import app.dao.OperatorDao as OperatorDao
 
 
@@ -168,6 +169,15 @@ def operator_execute(spark_session, operator_id):
         elif operator.operator_type_id == 2008:
             FEService.chiSqSelector(spark_session, operator_id, url_arr[0],
                                     json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 3001:
+            ExplorationService.full_table_statistics(spark_session, operator_id, url_arr[0],
+                                                     json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 3002:
+            ExplorationService.frequency_statistics(spark_session, operator_id, url_arr[0],
+                                                    json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 3003:
+            ExplorationService.correlation_coefficient(spark_session, operator_id, url_arr[0],
+                                                       json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 5001:
             preprocessService.read_data_with_update_record(spark_session, operator_id, url_arr[0])
 

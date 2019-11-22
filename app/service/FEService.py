@@ -4,13 +4,10 @@
 """
 from pyspark.sql import utils
 from pyspark.ml.feature import *
-from app.ConstFile import const
 from app.Utils import *
 import app.dao.OperatorDao as OperatorDao
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
-
-save_dir = const.SAVEDIR
 
 
 def quantile_discretization(spark_session, operator_id, file_url, condition):

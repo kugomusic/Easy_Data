@@ -2,9 +2,11 @@
 from app.models.MSEntity import Project, ProcessFlow
 import os, json, time
 from app import db
+import pandas as pd
 from pyspark.sql import SparkSession
 import uuid, shutil, traceback
 from flask.json import jsonify
+from app.ConstFile import const
 
 
 def list_str_to_list(str):
@@ -181,10 +183,45 @@ def getProjectCurrentData(ss, projectName):
     return df
 
 
+def read_data_pandas(file_url):
+    """
+    pandas 读取数据
+    :param file_url:
+    :return:
+    """
+    if file_url[-4:] == ".csv":
+        df = pd.read_csv(file_url, encoding="utf-8")
+    else:
+        df = pd.read_excel(file_url, encoding="utf-8")
+    return df
+
+
+def save_data_pandas(data, file_type="", file_url="", index=0):
+    """
+    pandas 写数据
+    :return:
+    """
+    if file_type == "":
+        file_type = 'csv'
+    if file_url == "":
+        file_url = const.MIDDATA + str(uuid.uuid1())
+
+    if file_type == 'json':
+        file_url = file_url + '.json'
+        json_str = json.dumps(data, ensure_ascii=False)
+        with open(file_url, "w", encoding="utf-8") as f:
+            json.dump(json_str, f, ensure_ascii=False)
+    elif file_type == 'csv':
+        file_url = file_url + '.csv'
+        data.to_csv(file_url, header=True, index=index)
+
+    return file_url
+
+
 def read_data(ss, file_url):
     """
-    读取数据
-    :param ss:
+    spark 读取数据
+    :param ss:spark session
     :param file_url:
     :return:
     """
@@ -201,7 +238,7 @@ def save_data(df, file_url=""):
     :return:
     """
     if file_url == "":
-        file_url = '/home/zk/midData/' + str(uuid.uuid1()) + '.csv'
+        file_url = const.MIDDATA + str(uuid.uuid1()) + '.csv'
     df.toPandas().to_csv(file_url, header=True, index=0)
     return file_url
 
