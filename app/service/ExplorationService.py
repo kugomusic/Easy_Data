@@ -69,7 +69,7 @@ def full_table_statistics_core(df, condition):
             info.append(str(df[columnName].skew()))
             info.append(str(df[columnName].kurt()))
         else:
-            info['类型'] = "text"
+            info.append('text')
             info.append(str(df[columnName].count()))
             info.append('')
             info.append('')
