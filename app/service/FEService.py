@@ -569,7 +569,7 @@ def chiSqSelector_core(df, condition):
 
     # 获取卡方选择结果topN的数目，默认numTopFeatures为1
     try:
-        num_top_features = condition['numTopFeatures']
+        num_top_features = int(condition['numTopFeatures'])
     except:
         num_top_features = 1
 
@@ -595,7 +595,7 @@ def chiSqSelector_core(df, condition):
     df = df.withColumn(label_uuid, df[column_name_label])
     # 设定卡方选择模型
     selector = ChiSqSelector(numTopFeatures=num_top_features, featuresCol=features_uuid, outputCol=new_column_name,
-                             labelCol=label_uuid, )
+                             labelCol=label_uuid)
     # 训练，若label的类型不是数值型，报错
     try:
         df = selector.fit(df).transform(df)
