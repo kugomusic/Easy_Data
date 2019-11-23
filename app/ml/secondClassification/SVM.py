@@ -1,9 +1,7 @@
 # -*- coding: UTF-8 -*-
-from pyspark.sql.types import *
 from pyspark.mllib.classification import SVMModel
 from pyspark.mllib.classification import SVMWithSGD
 from pyspark.mllib.regression import LabeledPoint
-from pyspark.mllib.evaluation import BinaryClassificationMetrics
 from app.Utils import *
 import numpy as np
 
@@ -49,7 +47,7 @@ userId = 1
 functionName = 'gdbt'
 projectName = '订单分析'
 label = 0  # 标签列
-features = [12, 13, 14, 15]  # 特征列
+features = ["数量", "折扣", "利润", "装运成本"]  # 特征列
 model_path = model_url(projectName)  # 项目路径
 
 # spark会话

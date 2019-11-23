@@ -69,6 +69,7 @@ def get_operator_by_id(operator_id):
 
 def get_operator_by_ids(operator_ids):
     """
+    TODO:不好使待调试
     通过 id集合 查询 operator
     :param operator_ids:[]
     :return:

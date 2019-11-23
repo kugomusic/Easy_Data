@@ -6,6 +6,8 @@ import traceback
 import app.service.FEService as FEService
 import app.service.PreprocessService as preprocessService
 import app.service.ExplorationService as ExplorationService
+import app.service.ml.PredictService as PredictService
+import app.service.ml.SecondClassification as SecondClassification
 import app.dao.OperatorDao as OperatorDao
 
 
@@ -180,6 +182,12 @@ def operator_execute(spark_session, operator_id):
                                                        json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 5001:
             preprocessService.read_data_with_update_record(spark_session, operator_id, url_arr[0])
+        elif operator.operator_type_id == 6000:
+            PredictService.ml_predict(spark_session, operator_id, url_arr,
+                                      json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 6001:
+            SecondClassification.svm(spark_session, operator_id, url_arr[0],
+                                     json.loads(operator.operator_config)['parameter'])
 
         return operator.child_operator_ids.split(',')
 

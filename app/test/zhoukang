@@ -53,5 +53,13 @@
 # 相关系数
 {"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 3003,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"projectId": 32, "columnNames": ["销售额", "折扣", "装运成本"]},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
 
+# 支持向量机二分类
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 6001,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"label": "标签", "features": ["数量", "折扣", "利润", "装运成本"], "iterations": 20, "step": 1.0, "regParam": 0.01, "regType": "l2", "convergenceTol": 0.001},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
+
+## 预测
+
+
+
+
 
 
