@@ -258,7 +258,7 @@ def initial_execute_status(execute_user_id, start_nodes):
             continue
         operator = OperatorDao.get_operator_by_id(operator_id)
         operator_list.append(operator)
-        for x in operator.child_operator_ids.split('*,'):
+        for x in operator.child_operator_ids.split(','):
             operator_id_queue.append(x)
 
     # 每个operator 状态初始化为initial

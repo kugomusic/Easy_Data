@@ -448,3 +448,50 @@ def column_map_core(df, condition):
                 df = df.withColumn(new_name, df[new_name] / df[new_name2])
             df = df.drop(new_name2)
     return df
+
+
+def random_split(spark_session, operator_id, file_url, condition):
+    """
+    按照比例随机划分数据
+    :param spark_session:
+    :param operator_id:
+    :param file_url:
+    :param condition:
+    :return:
+    """
+    try:
+        # 修改计算状态
+        OperatorDao.update_operator_by_id(operator_id, 'running', '', '')
+        # 读取数据
+        df = read_data(spark_session, file_url)
+        # 划分函数
+        (result_df1, result_df2) = random_split_core(df, condition)
+        # 存储结果
+        result_file_url1 = save_data(result_df1)
+        result_file_url2 = save_data(result_df2)
+        # 修改计算状态
+        run_info = '列映射算子执行成功'
+        OperatorDao.update_operator_by_id(operator_id, 'success', result_file_url1 + "*," +
+                                          result_file_url2, run_info)
+        return [result_file_url1, result_file_url2]
+
+    except Exception as e:
+        run_info = str(e)
+        OperatorDao.update_operator_by_id(operator_id, 'error', '', run_info)
+        traceback.print_exc()
+        return []
+
+
+def random_split_core(df, condition):
+    """
+    划分函数
+    :param df:
+    :param condition:{"proportion1": 0.7, "proportion2": 0.3, "seed": 10}
+    :return:
+    """
+
+    seed = condition['seed']
+    train = float(condition['proportion1'])
+    test = float(condition['proportion2'])
+    (trainingData, testData) = df.randomSplit([train, test], seed=seed)
+    return trainingData, testData

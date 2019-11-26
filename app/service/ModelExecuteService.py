@@ -147,6 +147,9 @@ def operator_execute(spark_session, operator_id):
         elif operator.operator_type_id == 1008:
             preprocessService.column_map(spark_session, operator_id, url_arr[0],
                                          json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 1009:
+            preprocessService.random_split(spark_session, operator_id, url_arr[0],
+                                           json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 2001:
             FEService.quantile_discretization(spark_session, operator_id, url_arr[0],
                                               json.loads(operator.operator_config)['parameter'])
