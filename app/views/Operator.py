@@ -32,19 +32,21 @@ def get_operate_result_data():
     if operator.status != "success":
         return "请执行该节点"
     if operator.operator_output_url is not None:
-        operator_output_url = operator.operator_output_url.split('*,')[0]
+        operator_output_url = operator.operator_output_url.split('*,')
     else:
         return "没有运行结果"
+    result_arr = []
     try:
-
-        data = pd.read_csv(operator_output_url, encoding='utf-8')
-        if len(data) < end:
-            end = len(data)
-        if start > end:
-            return jsonify({'length': len(data), 'data': "请输入合法参数"})
-        data2 = data[int(start):int(end)].to_json(orient='records', force_ascii=False)
-        return jsonify({'length': len(data), 'data': json.loads(data2)})
-
+        for i in range(len(operator_output_url)):
+            data = pd.read_csv(operator_output_url[i], encoding='utf-8')
+            if len(data) < end:
+                end = len(data)
+            if start > end:
+                result_arr.append({'length': len(data), 'data': "请输入合法参数", 'position': i})
+            else:
+                data2 = data[int(start):int(end)].to_json(orient='records', force_ascii=False)
+                result_arr.append({'length': len(data), 'data': json.loads(data2), 'position': i})
+        return jsonify(result_arr)
     except:
         traceback.print_exc()
         return "Error，please contact the administrator "
