@@ -60,6 +60,7 @@
 {"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "数据预处理","name" : 6001,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"label": "标签", "features": ["数量", "折扣", "利润", "装运成本"], "iterations": 20, "step": 1.0, "regParam": 0.01, "regType": "l2", "convergenceTol": 0.001},"fileUrl":[{"data1":0}]},"next" : ["pre1"],"pre" : ["data1"]},"pre1" : {"type" : "机器学习","name" : 6000,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" :{"features": [12, 13, 14, 15]},"fileUrl":[{"data1":0},{"exp1":0}]},"next" : [],"pre" : ["exp1","data1"]}}
 
 # 拆分数据
+{"data1" :{"type" : "data","location" : {"x":"12px", "y":"23px"},"name" : 5001,"config" : {"fileId" : 1,"fileUrl" : [{"data1":"/home/zk/data/订单信息.csv"}]},"next" : ["exp1"],"pre" : [""]},"exp1" : {"type" : "exploration","name" : 1009,"location" : {"x":"12px", "y":"23px"},"config" : {"parameter" : {"proportion1": 0.7, "proportion2": 0.3, "seed": 10},"fileUrl":[{"data1":0}]},"next" : [],"pre" : ["data1"]}}
 
 
 
