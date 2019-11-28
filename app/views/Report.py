@@ -1,15 +1,10 @@
 # encoding=utf8
-import sys
-from importlib import reload
-
-from flask import request, jsonify, Response
+from flask import request
 from flask.json import jsonify
 from app import app
 from app import db
-from app.models.MSEntity import DataSource, Project, Report
+from app.models.MSEntity import Report
 import traceback
-from app.Utils import mkdir, getProjectByNameAndUserId
-from app.ConstFile import const
 
 
 @app.route('/report/getAll', methods=['GET', 'POST'])
