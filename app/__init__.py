@@ -23,7 +23,7 @@ app.config.from_object('config')
 db = SQLAlchemy(app)
 #
 from app.views import Mysql, Exploration, Process, Process2, OperateFlow, FeatureEngineering, Project, ProjectModel, \
-    OperateType, Operator
+    OperateType, Operator, Report
 from app.views.datasource import DataSource
 
 # from app import test

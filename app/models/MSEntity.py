@@ -126,3 +126,14 @@ class ModelExecute(db.Model):
     run_info = db.Column(db.String(4096))
     create_time = db.Column(db.String(32))
     end_time = db.Column(db.String(32))
+
+
+class Report(db.Model):
+    """
+    报告表
+    """
+    __tablename__ = 'report'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(128))
+    report_title = db.Column(db.String(128))
+    report_content = db.Column(db.String(20000))

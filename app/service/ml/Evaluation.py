@@ -60,14 +60,19 @@ def second_evaluation_core(spark_session, condition, operator_id):
     print("**********祖节点（模型节点和读预测数据源节点）:", grand_father_ids)
 
     # 读数据
-    def get_predict_data(grand_father_ids_):
-        for grand_father_id_ in grand_father_ids_:
+    def get_predict_data(operator_config_):
+        for grand_father_file_ in operator_config_:
+            grand_father_id_ = list(grand_father_file_.keys())[0]
             grand_father_ = OperatorDao.get_operator_by_id(grand_father_id_)
-            if grand_father_.operator_type_id == 5001:
+            if grand_father_.operator_type_id == 5001 or grand_father_.operator_type_id < 3000:
                 print("***************评估函数，预测数据：", grand_father_.operator_type_id)
-                return read_data(spark_session, json.loads(grand_father_.operator_config)["fileUrl"][0]["data1"])
+                pre_data_file_url = grand_father_.operator_output_url.split('*,')[
+                    grand_father_file_[grand_father_id_]]
+                print("***************评估函数，预测数据url：", pre_data_file_url)
+                return read_data(spark_session, pre_data_file_url)
 
-    df = get_predict_data(grand_father_ids)
+    print("**********预测节点:", father_operator.operator_config)
+    df = get_predict_data(json.loads(father_operator.operator_config)['fileUrl'])
 
     # 评估
     for grand_father_id in grand_father_ids:
