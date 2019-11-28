@@ -84,3 +84,23 @@ def report_update_one():
     except:
         traceback.print_exc()
         return {"status": False, "message": "失败"}
+
+
+@app.route('/report/save', methods=['POST'])
+def report_save_one():
+    """
+    保存一个报告
+    :return:
+    """
+    try:
+        user_id = request.form.get('userId')
+        report_title = request.form.get('title')
+        report_content = request.form.get('content')
+
+        report = Report(user_id=user_id, report_title=report_title, report_content=report_content)
+        db.session.add(report)
+        db.session.commit()
+        return {"status": True, "message": "成功"}
+    except:
+        traceback.print_exc()
+        return {"status": False, "message": "失败"}
