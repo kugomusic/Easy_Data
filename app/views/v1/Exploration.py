@@ -9,6 +9,9 @@ from app.ConstFile import const
 
 jsonFileName = const.JSONFILENAME
 
+"""
+v1版本，弃用
+"""
 
 # 解决 list, dict 不能返回的问题
 class MyResponse(Response):

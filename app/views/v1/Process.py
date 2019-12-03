@@ -8,6 +8,10 @@ import random, string
 from app.ConstFile import const
 from datetime import datetime
 
+"""
+v1版本，弃用
+"""
+
 save_dir = const.SAVEDIR
 
 

@@ -5,6 +5,10 @@ from app.Utils import *
 from app.enmus.EnumConst import OperatorType
 from app.ConstFile import const
 
+"""
+v1版本，弃用
+"""
+
 save_dir = const.SAVEDIR
 
 

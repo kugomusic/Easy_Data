@@ -2,6 +2,9 @@
 import sys
 from importlib import reload
 
+"""
+v1版本，弃用
+"""
 reload(sys)
 
 from flask import request, jsonify, Response
@@ -190,4 +193,3 @@ def currentDataPreview():
         return jsonify({'length': len(data), 'data': json.loads(data2)})
     except:
         return "error read"
-

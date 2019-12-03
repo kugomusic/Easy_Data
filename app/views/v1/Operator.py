@@ -6,6 +6,10 @@ import app.dao.OperatorDao as OperatorDao
 import pandas as pd
 import app.service.MLModelService as MLModelService
 
+"""
+v1版本，弃用
+"""
+
 
 # 解决 list, dict 不能返回的问题
 class MyResponse(Response):

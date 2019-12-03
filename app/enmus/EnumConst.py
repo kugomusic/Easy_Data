@@ -1,6 +1,10 @@
 # 导入枚举类
 from enum import Enum
 
+"""
+v1版本，弃用
+"""
+
 
 # 继承枚举类
 # 算子编码枚举类
@@ -35,8 +39,8 @@ class OperatorType(Enum):
     # 字符串转标签
     STRINGINDEXER = '2005'
     # 独热编码
-    ONEHOTENCODER= '2006'
+    ONEHOTENCODER = '2006'
     # 多项式扩展
-    POLYNOMIALEXPANSION= '2007'
+    POLYNOMIALEXPANSION = '2007'
     # 卡放选择
-    CHISQSELECTOR= '2008'
+    CHISQSELECTOR = '2008'

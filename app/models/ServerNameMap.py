@@ -1,5 +1,10 @@
 # -*- coding: UTF-8 -*-
 
+"""
+v1版本，弃用
+"""
+
+
 class ServerNameMap():
     operateIdToNameMap = {
         # 1000 数据预处理

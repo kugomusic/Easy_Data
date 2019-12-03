@@ -9,6 +9,10 @@ from app.enmus.EnumConst import OperatorType
 import pyspark.sql.functions as F
 import pyspark.sql.types as T
 
+"""
+v1版本，弃用
+"""
+
 save_dir = const.SAVEDIR
 
 
