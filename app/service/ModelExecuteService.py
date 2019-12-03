@@ -5,6 +5,7 @@ import threading
 import traceback
 import app.service.FEService as FEService
 import app.service.ml.Evaluation as Evaluation
+import app.service.ml.ModelService as ModelService
 import app.service.PreprocessService as preprocessService
 import app.service.ExplorationService as ExplorationService
 import app.service.ml.PredictService as PredictService
@@ -195,6 +196,8 @@ def operator_execute(spark_session, operator_id):
         elif operator.operator_type_id == 7001:
             Evaluation.second_evaluation(spark_session, operator_id,
                                          json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 8000:
+            ModelService.model_operator(operator_id, json.loads(operator.operator_config)['parameter'])
 
         return operator.child_operator_ids.split(',')
 

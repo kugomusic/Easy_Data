@@ -67,7 +67,13 @@ def ml_predict_core(spark_session, operator_id, df, model_urls, condition):
         father = OperatorDao.get_operator_by_id(father_id)
         print("***************", father.operator_type_id)
         print("---------------", father.operator_type_id == 6001)
-        if father.operator_type_id == 6001:
+        operator_type_flag = father.operator_type_id
+
+        # 模型加载节点
+        if operator_type_flag == 8000:
+            operator_type_flag = json.loads(father.operator_config)['parameter']['operatorTypeId']
+
+        if operator_type_flag == 6001:  # svm二分类
             prediction_df = svm_second_predict(spark_session, model_urls, df, condition)
 
     # 根据父组件的类型决定加载哪种模型

@@ -4,6 +4,7 @@ from app import app
 from app.Utils import *
 import app.dao.OperatorDao as OperatorDao
 import pandas as pd
+import app.service.MLModelService as MLModelService
 
 
 # 解决 list, dict 不能返回的问题
@@ -50,3 +51,62 @@ def get_operate_result_data():
     except:
         traceback.print_exc()
         return "Error，please contact the administrator "
+
+
+@app.route('/operate/saveOperateModel', methods=['GET', 'POST'])
+def save_operate_model():
+    """
+    对于模型算子 保存模型
+    :return:
+    """
+    operator_id = request.form.get('operatorId')
+    user_id = request.form.get('userId')
+    name = request.form.get('name')
+
+    try:
+        result = MLModelService.save_ml_model(operator_id, user_id, name)
+        if isinstance(result, str):
+            return result
+        if isinstance(result, bool):
+            if result is True:
+                return "success"
+        return "fail"
+    except:
+        traceback.print_exc()
+        return "Error，please contact the administrator "
+
+
+@app.route('/operate/getOperateModel', methods=['GET', 'POST'])
+def get_operate_model():
+    """
+    获取保存的模型
+    :return:
+    """
+    ml_model_id = request.form.get('MLModelId')
+    project_id = request.form.get('projectId')
+    user_id = request.form.get('userId')
+    model_id = request.form.get('modelId')
+    name = request.form.get('name')
+    status = request.form.get('status')
+
+    try:
+        results = MLModelService.get_ml_model(ml_model_id, project_id, user_id, model_id, name, status)
+        return jsonify(results)
+    except:
+        traceback.print_exc()
+    return "Error，please contact the administrator "
+
+
+@app.route('/operate/deleteOperateModel', methods=['GET', 'POST'])
+def delete_operate_model():
+    """
+    删除保存的模型
+    :return:
+    """
+    ml_model_id = request.form.get('MLModelId')
+    try:
+        model = MLModelService.delete_ml_model(ml_model_id)
+        return 'success'
+    except:
+        traceback.print_exc()
+    return "Error，please contact the administrator "

@@ -10,6 +10,23 @@ import app.Utils as utils
 """
 
 
+def get_model_by_id(id):
+    """
+    通过ID 获取 model
+    :param id:
+    :return:
+    """
+
+    try:
+        query = db.session.query(Model).filter(Model.id == id).first()
+        db.session.commit()
+        return query
+
+    except Exception:
+        print(traceback.print_exc())
+        return False
+
+
 def get_model_by_project_id(project_id):
     """
     通过项目ID 获取 项目对应的model

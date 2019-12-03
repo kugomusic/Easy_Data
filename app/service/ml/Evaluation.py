@@ -77,8 +77,11 @@ def second_evaluation_core(spark_session, condition, operator_id):
     # 评估
     for grand_father_id in grand_father_ids:
         grand_father = OperatorDao.get_operator_by_id(grand_father_id)
-
-        if grand_father.operator_type_id == 6001:
+        grand_father_operator_type = grand_father.operator_type_id
+        # 模型加载节点
+        if grand_father_operator_type == 8000:
+            grand_father_operator_type = json.loads(grand_father.operator_config)['parameter']['modelTypeId']
+        if grand_father_operator_type == 6001:  # svm二分类节点
             print("***************评估函数，训练模型", grand_father.operator_type_id)
             evaluation_df = svm_second_evaluation(spark_session, grand_father.operator_output_url, df,
                                                   json.loads(father_operator.operator_config)['parameter'], condition)
