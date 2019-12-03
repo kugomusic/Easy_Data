@@ -82,13 +82,14 @@ def get_operate_model():
     获取保存的模型
     :return:
     """
-    ml_model_id = request.form.get('MLModelId')
-    project_id = request.form.get('projectId')
-    user_id = request.form.get('userId')
-    model_id = request.form.get('modelId')
-    name = request.form.get('name')
-    status = request.form.get('status')
+    ml_model_id = request.args.get('MLModelId')
+    project_id = request.args.get('projectId')
+    user_id = request.args.get('userId')
+    model_id = request.args.get('modelId')
+    name = request.args.get('name')
+    status = request.args.get('status')
 
+    print(ml_model_id, project_id, user_id, model_id, name, status)
     try:
         results = MLModelService.get_ml_model(ml_model_id, project_id, user_id, model_id, name, status)
         return jsonify(results)

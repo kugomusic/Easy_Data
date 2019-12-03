@@ -57,20 +57,19 @@ def get_ml_model(ml_model_id, project_id, user_id, model_id, name, status):
     :param status:
     :return:
     """
-    filters = {}
+    ml_models = MLModel.query
     if (ml_model_id is not None) and (ml_model_id is not ''):
-        filters[MLModel.id] = ml_model_id
+        ml_models = ml_models.filter(MLModel.id == ml_model_id)
     if (project_id is not None) and (project_id is not ''):
-        filters[MLModel.project_id] = project_id
+        ml_models = ml_models.filter(MLModel.project_id == project_id)
     if (user_id is not None) and (user_id is not ''):
-        filters[MLModel.user_id] = user_id
+        ml_models = ml_models.filter(MLModel.user_id == user_id)
     if (model_id is not None) and (model_id is not ''):
-        filters[MLModel.model_id] = model_id
+        ml_models = ml_models.filter(MLModel.model_id == model_id)
     if (name is not None) and (name is not ''):
-        filters[MLModel.name] = name
+        ml_models = ml_models.filter(MLModel.name == name)
     if (status is not None) and (status is not ''):
-        filters[MLModel.status] = status
-    ml_models = MLModel.query.filter(*filters)
+        ml_models = ml_models.filter(MLModel.status == status)
     results = []
     for ml_model in ml_models:
         results.append({"MLModelId": ml_model.id, "status": ml_model.status, "name": ml_model.name,
