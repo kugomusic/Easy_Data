@@ -32,6 +32,7 @@ def model_url(projectName):
 
 
 def gbdt(data, label_index, feature_indexs, project_url):
+
     # 2.构造训练数据集
     data_set = data.rdd.map(list)
     (train_data, test_data) = data_set.randomSplit([trainDataRatio, 1 - trainDataRatio])

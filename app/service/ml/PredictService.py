@@ -6,6 +6,9 @@ from pyspark.mllib.classification import SVMModel
 from pyspark.mllib.regression import LabeledPoint
 import app.dao.OperatorDao as OperatorDao
 from app.Utils import *
+from pyspark.ml.linalg import Vectors
+from pyspark.sql.types import Row
+from pyspark.ml.classification import GBTClassificationModel
 
 
 def ml_predict(spark_session, operator_id, file_urls, condition):
@@ -23,6 +26,7 @@ def ml_predict(spark_session, operator_id, file_urls, condition):
         OperatorDao.update_operator_by_id(operator_id, 'running', '', '')
         # 读取数据
         for url in file_urls:
+            print("------fileUrl:", file_urls)
             if url[-4:] == ".csv":
                 url1 = url
             else:
@@ -48,13 +52,13 @@ def ml_predict(spark_session, operator_id, file_urls, condition):
     return []
 
 
-def ml_predict_core(spark_session, operator_id, df, model_urls, condition):
+def ml_predict_core(spark_session, operator_id, df, model_url, condition):
     """
     路由控制加载哪种模型进行预测
     :param spark_session:
     :param operator_id:
     :param df:
-    :param model_urls:
+    :param model_url:
     :param condition:
     :return:  预测结果 sparkframe
     """
@@ -71,10 +75,12 @@ def ml_predict_core(spark_session, operator_id, df, model_urls, condition):
 
         # 模型加载节点
         if operator_type_flag == 8000:
-            operator_type_flag = json.loads(father.operator_config)['parameter']['operatorTypeId']
+            operator_type_flag = json.loads(father.operator_config)['parameter']['modelTypeId']
 
         if operator_type_flag == 6001:  # svm二分类
-            prediction_df = svm_second_predict(spark_session, model_urls, df, condition)
+            prediction_df = svm_second_predict(spark_session, model_url, df, condition)
+        elif operator_type_flag == 6002:  # gbdt二分类
+            prediction_df = gbdt_second_predict(model_url, df, condition)
 
     # 根据父组件的类型决定加载哪种模型
     return prediction_df
@@ -107,8 +113,6 @@ def svm_second_predict(spark_session, svm_model_path, df, condition):
         svm_model = SVMModel.load(spark_session.sparkContext, svm_model_path)
 
         # 3.预测
-        from pyspark.sql.types import Row
-
         def f(x):
             return {"prediction_result": x}
 
@@ -139,4 +143,51 @@ def svm_second_predict(spark_session, svm_model_path, df, condition):
         prediction_rdd = predict_label_data.map(lambda x: (svm_model.predict(x.features), x.label))
         print(prediction_rdd.take(10))
         prediction_df = prediction_rdd.map(lambda x: Row(**f(x))).toDF()
+        return prediction_df
+
+
+def gbdt_second_predict(gbdt_model_path, df, condition):
+    """
+    gbdt二分类预测
+    :param gbdt_model_path: 模型地址
+    :param df: 数据
+    :param condition: {"features": [12, 13, 14, 15], "label": "label"}
+    特征列
+    :return: 预测结果 sparkframe
+    """
+    feature_indexs = condition['features']
+    label_index = condition['label']
+
+    if label_index is None or label_index == "":  # 无标签列
+        # 1. 准备数据
+        def func(x):
+            features_data = []
+            for feature in feature_indexs:
+                features_data.append(x[feature])
+            return Row(features=Vectors.dense(features_data))
+
+        training_set = df.rdd.map(lambda x: func(x)).toDF()
+
+        # 2.加载模型
+        gbdt_model = GBTClassificationModel.load(gbdt_model_path)
+
+        # 3.预测
+        prediction_df = gbdt_model.transform(training_set).select("prediction", "features")
+        return prediction_df
+    else:  # 有标签列
+        # 1. 准备数据
+        def func(x):
+            features_data = []
+            for feature in feature_indexs:
+                features_data.append(x[feature])
+            return Row(label=x[label_index], features=Vectors.dense(features_data))
+
+        training_set = df.rdd.map(lambda x: func(x)).toDF()
+
+        # 2.加载模型
+        print("****gbdt_model_path:", gbdt_model_path)
+        gbdt_model = GBTClassificationModel.load(gbdt_model_path)
+
+        # 3.预测
+        prediction_df = gbdt_model.transform(training_set).select("prediction", "label", "features")
         return prediction_df

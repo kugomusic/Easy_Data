@@ -32,8 +32,7 @@ def get_ml_model(ml_model_id):
     :param ml_model_id:
     :return:
     """
-    filters = {}
-    if (ml_model_id is not None) and (ml_model_id is not ''):
-        filters[MLModel.id] = ml_model_id
-    ml_model = MLModel.query.filter(*filters).frist()
+
+    filters = {MLModel.id == ml_model_id}
+    ml_model = MLModel.query.filter(*filters).first()
     return ml_model

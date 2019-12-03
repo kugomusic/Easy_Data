@@ -104,9 +104,9 @@ def operator_execute(spark_session, operator_id):
     :return:
     """
     try:
-        print("------执行算子------", "operator_id：", operator_id)
         # 查算子
         operator = OperatorDao.get_operator_by_id(operator_id)
+        print("------执行算子------", "operator_id：", operator_id, operator.operator_type_id)
         # 获取input_url
         config = json.loads(operator.operator_config)
         file_url_list = config['fileUrl']
@@ -193,6 +193,9 @@ def operator_execute(spark_session, operator_id):
         elif operator.operator_type_id == 6001:
             SecondClassification.svm(spark_session, operator_id, url_arr[0],
                                      json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 6002:
+            SecondClassification.gbdt(spark_session, operator_id, url_arr[0],
+                                      json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 7001:
             Evaluation.second_evaluation(spark_session, operator_id,
                                          json.loads(operator.operator_config)['parameter'])
