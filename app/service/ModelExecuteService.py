@@ -10,6 +10,7 @@ import app.service.PreprocessService as preprocessService
 import app.service.ExplorationService as ExplorationService
 import app.service.ml.PredictService as PredictService
 import app.service.ml.SecondClassification as SecondClassification
+import app.service.ml.MultipleClassifition as MultipleClassifition
 import app.dao.OperatorDao as OperatorDao
 
 
@@ -198,6 +199,9 @@ def operator_execute(spark_session, operator_id):
                                       json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 6003:
             SecondClassification.lr(spark_session, operator_id, url_arr[0],
+                                    json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 6004:
+            MultipleClassifition.lr(spark_session, operator_id, url_arr[0],
                                     json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 7001:
             Evaluation.second_evaluation(spark_session, operator_id,

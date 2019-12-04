@@ -83,6 +83,8 @@ def ml_predict_core(spark_session, operator_id, df, model_url, condition):
             prediction_df = gbdt_second_predict(model_url, df, condition)
         elif operator_type_flag == 6003:  # lr二分类
             prediction_df = lr_second_predict(model_url, df, condition)
+        elif operator_type_flag == 6004:  # lr多分类
+            prediction_df = lr_multiple_predict(model_url, df, condition)
 
     # 根据父组件的类型决定加载哪种模型
     return prediction_df
@@ -240,3 +242,18 @@ def lr_second_predict(lr_model_path, df, condition):
         # 3.预测
         prediction_df = lr_model.transform(training_set).select("prediction", "label", "features")
         return prediction_df
+
+
+""" 多分类 """
+
+
+def lr_multiple_predict(lr_model_path, df, condition):
+    """
+    lr多分类预测
+    :param lr_model_path: 模型地址
+    :param df: 数据
+    :param condition: {"features": [12, 13, 14, 15], "label": "label"}
+    特征列
+    :return: 预测结果 sparkframe
+    """
+    return lr_second_predict(lr_model_path, df, condition)
