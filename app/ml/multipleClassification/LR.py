@@ -101,22 +101,19 @@ def lr(ss, data, label_index, feature_indexs, project_url):
 
 userId = 1
 functionName = 'lr'
-# projectName = '订单分析'
-# label = 0  # 标签列
-# features = [2, 4, 10, 11, 12]  # 特征列
-# project_path = project_url(projectName)  # 项目路径
-# # spark会话
+projectName = '订单分析'
+label = 0  # 标签列
+features = [2, 4, 10, 11, 12]  # 特征列
+project_path = project_url(projectName)  # 项目路径
+# spark会话
 ss = getSparkSession(userId, functionName)
-# # 解析项目路径，读取csv
-# fileUrl = '/home/zk/data/adult.csv'
-# df = ss.read.csv(fileUrl)
-# df.filter
-# print(df.dtypes)
-#
-# df.show()
-# # df = getProjectCurrentData(ss, projectName)
-# # 罗辑回归二分类
-# lr(ss, df, label, features, project_path)
+# 解析项目路径，读取csv
+fileUrl = '/home/zk/data/adult.csv'
+df = ss.read.csv(fileUrl)
+df.filter
+print(df.dtypes)
 
-data_path = "data/mllib/sample_multiclass_classification_data.txt"
-mdf = ss.read.format("libsvm").load(data_path)
+df.show()
+# df = getProjectCurrentData(ss, projectName)
+# 罗辑回归二分类
+lr(ss, df, label, features, project_path)

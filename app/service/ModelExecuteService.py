@@ -203,6 +203,9 @@ def operator_execute(spark_session, operator_id):
         elif operator.operator_type_id == 6004:
             MultipleClassifition.lr(spark_session, operator_id, url_arr[0],
                                     json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 6005:
+            MultipleClassifition.mpc(spark_session, operator_id, url_arr[0],
+                                     json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 7001:
             Evaluation.second_evaluation(spark_session, operator_id,
                                          json.loads(operator.operator_config)['parameter'])
