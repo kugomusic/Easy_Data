@@ -8,7 +8,7 @@ import app.dao.OperatorDao as OperatorDao
 from app.Utils import *
 from pyspark.ml.linalg import Vectors
 from pyspark.sql.types import Row
-from pyspark.ml.classification import GBTClassificationModel
+from pyspark.ml.classification import GBTClassificationModel, LogisticRegressionModel
 
 
 def ml_predict(spark_session, operator_id, file_urls, condition):
@@ -81,6 +81,8 @@ def ml_predict_core(spark_session, operator_id, df, model_url, condition):
             prediction_df = svm_second_predict(spark_session, model_url, df, condition)
         elif operator_type_flag == 6002:  # gbdt二分类
             prediction_df = gbdt_second_predict(model_url, df, condition)
+        elif operator_type_flag == 6003:  # lr二分类
+            prediction_df = lr_second_predict(model_url, df, condition)
 
     # 根据父组件的类型决定加载哪种模型
     return prediction_df
@@ -190,4 +192,51 @@ def gbdt_second_predict(gbdt_model_path, df, condition):
 
         # 3.预测
         prediction_df = gbdt_model.transform(training_set).select("prediction", "label", "features")
+        return prediction_df
+
+
+def lr_second_predict(lr_model_path, df, condition):
+    """
+    lr二分类预测
+    :param lr_model_path: 模型地址
+    :param df: 数据
+    :param condition: {"features": [12, 13, 14, 15], "label": "label"}
+    特征列
+    :return: 预测结果 sparkframe
+    """
+    feature_indexs = condition['features']
+    label_index = condition['label']
+
+    if label_index is None or label_index == "":  # 无标签列
+        # 1. 准备数据
+        def func(x):
+            features_data = []
+            for feature in feature_indexs:
+                features_data.append(x[feature])
+            return Row(features=Vectors.dense(features_data))
+
+        training_set = df.rdd.map(lambda x: func(x)).toDF()
+
+        # 2.加载模型
+        lr_model = LogisticRegressionModel.load(lr_model_path)
+
+        # 3.预测
+        prediction_df = lr_model.transform(training_set).select("prediction", "features")
+        return prediction_df
+    else:  # 有标签列
+        # 1. 准备数据
+        def func(x):
+            features_data = []
+            for feature in feature_indexs:
+                features_data.append(x[feature])
+            return Row(label=x[label_index], features=Vectors.dense(features_data))
+
+        training_set = df.rdd.map(lambda x: func(x)).toDF()
+
+        # 2.加载模型
+        print("*****lr_model_path:", lr_model_path)
+        lr_model = LogisticRegressionModel.load(lr_model_path)
+
+        # 3.预测
+        prediction_df = lr_model.transform(training_set).select("prediction", "label", "features")
         return prediction_df

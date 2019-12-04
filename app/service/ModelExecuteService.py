@@ -196,6 +196,9 @@ def operator_execute(spark_session, operator_id):
         elif operator.operator_type_id == 6002:
             SecondClassification.gbdt(spark_session, operator_id, url_arr[0],
                                       json.loads(operator.operator_config)['parameter'])
+        elif operator.operator_type_id == 6003:
+            SecondClassification.lr(spark_session, operator_id, url_arr[0],
+                                    json.loads(operator.operator_config)['parameter'])
         elif operator.operator_type_id == 7001:
             Evaluation.second_evaluation(spark_session, operator_id,
                                          json.loads(operator.operator_config)['parameter'])
