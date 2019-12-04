@@ -22,43 +22,84 @@ def update_model(project_id, start_nodes, config, relationship, config_order):
     :param config:
     :return:
     """
-    # 获取model
-    model = ModelDao.get_model_by_project_id(project_id)
-    if model is False:
+    try:
+        # 获取model
+        model = ModelDao.get_model_by_project_id(project_id)
+        if model is False:
+            return False
+
+        # 更新model
+        update_result = ModelDao.update_with_project_id(project_id, start_nodes, relationship, config_order)
+        if update_result is False:
+            return False
+
+        # 获取 operator
+        operator_old = OperatorDao.get_operator_by_model_id(model.id)
+
+        # 新的operator
+        operators = []
+        config_dict = json.loads(config)
+        for operator_id in config_dict.keys():
+            operator_dict = config_dict.get(operator_id)
+            operator_style = json.dumps({'location': operator_dict['location'], }, ensure_ascii=False)
+            # json.dumps(operates, ensure_ascii=False)
+            ope = Operator(id=operator_id,
+                           father_operator_ids=','.join(operator_dict['pre']),
+                           child_operator_ids=','.join(operator_dict['next']),
+                           model_id=model.id,
+                           status='initial',
+                           operator_type_id=operator_dict['name'],
+                           operator_config=json.dumps(operator_dict['config'], ensure_ascii=False),
+                           operator_style=operator_style)
+            operators.append(ope)
+
+        # 准备删除的算子
+        operator_delete = []
+        # 准备更新的算子
+        operator_update = []
+        for old in operator_old:
+            flag_exist = False
+            for new in operators:
+                if old.id == new.id:
+                    flag_exist = True
+                    operator_update.append([old, new])
+                    break
+            if not flag_exist:
+                operator_delete.append(old)
+        # 删除算子
+        for delete in operator_delete:
+            OperatorDao.delete_operator_by_id(delete.id)
+            print("********删除算子", delete)
+
+        # 更新算子
+        for update in operator_update:
+            update[0].father_operator_ids = update[1].father_operator_ids
+            update[0].child_operator_ids = update[1].child_operator_ids
+            update[0].model_id = update[1].model_id
+            update[0].operator_type_id = update[1].operator_type_id
+            update[0].operator_config = update[1].operator_config
+            update[0].operator_style = update[1].operator_style
+            # 更新算子
+            OperatorDao.create_operator([update[0]])
+            print("*********更新算子", update[0])
+
+        # 准备添加的算子
+        operator_add = []
+        for new in operators:
+            flag_exist = False
+            for old in operator_old:
+                if old.id == new.id:
+                    flag_exist = True
+                    break
+            if not flag_exist:
+                operator_add.append(new)
+        # 添加算子
+        OperatorDao.create_operator(operator_add)
+        print("*********添加算子", operator_add)
+        return True
+    except:
+        traceback.print_exc()
         return False
-
-    # 更新model
-    update_result = ModelDao.update_with_project_id(project_id, start_nodes, relationship, config_order)
-    if update_result is False:
-        return False
-
-    # 删除旧的operator
-    delete_result = OperatorDao.delete_operator_by_model_id(model.id)
-    if delete_result is False:
-        return False
-
-    # 添加新的operator
-    operators = []
-    config_dict = json.loads(config)
-    for operator_id in config_dict.keys():
-        operator_dict = config_dict.get(operator_id)
-        operator_style = json.dumps({'location': operator_dict['location'], }, ensure_ascii=False)
-        # json.dumps(operates, ensure_ascii=False)
-        ope = Operator(id=operator_id,
-                       father_operator_ids=','.join(operator_dict['pre']),
-                       child_operator_ids=','.join(operator_dict['next']),
-                       model_id=model.id,
-                       status='initial',
-                       operator_type_id=operator_dict['name'],
-                       operator_config=json.dumps(operator_dict['config'], ensure_ascii=False),
-                       operator_style=operator_style)
-        operators.append(ope)
-
-    create_result = OperatorDao.create_operator(operators)
-    if create_result is False:
-        return False
-
-    return True
 
 
 def get_model_by_project_id(project_id):

@@ -113,6 +113,21 @@ def delete_operator_by_model_id(model_id):
         return False
 
 
+def delete_operator_by_id(operator_id):
+    """
+    通过 id 删除 operator
+    :param operator_id:
+    :return:
+    """
+    try:
+        db.session.query(Operator).filter(Operator.id == operator_id).delete()
+        db.session.commit()
+        return True
+    except Exception:
+        print(traceback.print_exc())
+        return False
+
+
 def create_operator(operators):
     """
     创建 新的operator（算子）
@@ -123,7 +138,6 @@ def create_operator(operators):
         session = db.session
         session.add_all(operators)
         session.commit()
-        print('成功创建一个算子')
         return True
 
     except Exception:
