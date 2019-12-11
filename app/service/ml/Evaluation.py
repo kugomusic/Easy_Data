@@ -7,6 +7,9 @@ import app.dao.OperatorDao as OperatorDao
 from pyspark.mllib.classification import SVMModel
 from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.evaluation import BinaryClassificationMetrics
+from pyspark.ml.linalg import Vectors
+from pyspark.sql.types import Row
+from pyspark.ml.classification import LogisticRegressionModel
 from app.Utils import *
 
 
@@ -86,6 +89,11 @@ def second_evaluation_core(spark_session, condition, operator_id):
             evaluation_df = svm_second_evaluation(spark_session, grand_father.operator_output_url, df,
                                                   json.loads(father_operator.operator_config)['parameter'], condition)
             return evaluation_df
+        elif grand_father_operator_type == 6003:  # lr二分类节点
+            print("***************评估函数，训练模型", grand_father.operator_type_id)
+            evaluation_df = lr_second_evaluation(spark_session, grand_father.operator_output_url, df,
+                                                 json.loads(father_operator.operator_config)['parameter'], condition)
+            return evaluation_df
 
 
 def svm_second_evaluation(spark_session, svm_model_path, df, predict_condition, condition):
@@ -131,4 +139,51 @@ def svm_second_evaluation(spark_session, svm_model_path, df, predict_condition, 
               ("精准度", float(svmAccuracy)),
               ("Area under PR", float(svmMetrics.areaUnderPR)),
               ("Area under ROC", float(svmMetrics.areaUnderROC))]
+    return spark_session.createDataFrame(result, schema=['指标', '值'])
+
+
+def lr_second_evaluation(spark_session, lr_model_path, df, predict_condition, condition):
+    """
+    lr二分类评估
+    :param spark_session:
+    :param lr_model_path: 模型地址
+    :param df: 预测数据
+    :param predict_condition: 预测算子（父算子）配置
+    :param condition: 该算子配置 {"label":"标签"}
+    :return:
+    """
+
+    feature_indexs = predict_condition['features']
+    label_index = condition['label']
+
+    # 1. 准备数据
+    def func(x):
+        features_data = []
+        for feature in feature_indexs:
+            features_data.append(x[feature])
+        return Row(label=x[label_index], features=Vectors.dense(features_data))
+
+    predict_data = df.rdd.map(lambda x: func(x)).toDF()
+
+    # 2.加载模型
+    print("*****lr_model_path:", lr_model_path)
+    lr_model = LogisticRegressionModel.load(lr_model_path)
+
+    # 计算评估指标
+    lrTotalCorrect = predict_data.map(lambda r: 1 if (lr_model.predict(r.features) == r.label) else 0).reduce(
+        lambda x, y: x + y)
+    lrAccuracy = lrTotalCorrect / float(predict_data.count())  # 0.5136044023234485
+    # 清除默认阈值，这样会输出原始的预测评分，即带有确信度的结果
+    lr_model.clearThreshold()
+    lrPredictionAndLabels = predict_data.map(lambda lp: (float(lr_model.predict(lp.features)), lp.label))
+    lrmetrics = BinaryClassificationMetrics(lrPredictionAndLabels)
+
+    print("Area under PR = %s" % lrmetrics.areaUnderPR)
+    print("Area under ROC = %s" % lrmetrics.areaUnderROC)
+
+    # 返回数据
+    result = [("正确个数", float(lrTotalCorrect)),
+              ("精准度", float(lrAccuracy)),
+              ("Area under PR", float(lrmetrics.areaUnderPR)),
+              ("Area under ROC", float(lrmetrics.areaUnderROC))]
     return spark_session.createDataFrame(result, schema=['指标', '值'])

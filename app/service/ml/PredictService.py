@@ -207,7 +207,7 @@ def lr_second_predict(lr_model_path, df, condition):
     :param df: 数据
     :param condition: {"features": [12, 13, 14, 15], "label": "label"}
     特征列
-    :return: 预测结果 sparkframe
+    :return: 预测结果 spark dataframe
     """
     feature_indexs = condition['features']
     label_index = condition['label']

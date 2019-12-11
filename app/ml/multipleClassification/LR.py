@@ -82,21 +82,22 @@ def lr(ss, data, label_index, feature_indexs, project_url):
     # print(lr_model.explainParams())  # 参数以及其注解
 
     # 3.保存模型
-    model_path = project_url + '/model/multipleClassification/lr'
-    lr_model.write().overwrite().save(model_path)
-
-    # 4.读取模型
-    lr2 = lr_model.load(model_path)
+    # model_path = project_url + '/model/multipleClassification/lr'
+    # lr_model.write().overwrite().save(model_path)
+    #
+    # # 4.读取模型
+    # lr2 = lr_model.load(model_path)
 
     # 5.预测
-    result = lr2.transform(training_set).head()
+    result = lr_model.transform(training_set).head()
     print(result.prediction)
 
     LogisticRegressionTrainingSummary
     sum = lr_model.summary
 
     # 6.评估
-    # summary = lr_model.evaluate(training_set)
+    summary = lr_model.evaluate(training_set)
+    summary.show()
 
 
 userId = 1
