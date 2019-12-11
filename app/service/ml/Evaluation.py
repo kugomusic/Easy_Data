@@ -170,12 +170,13 @@ def lr_second_evaluation(spark_session, lr_model_path, df, predict_condition, co
     lr_model = LogisticRegressionModel.load(lr_model_path)
 
     # 计算评估指标
-    lrTotalCorrect = predict_data.map(lambda r: 1 if (lr_model.predict(r.features) == r.label) else 0).reduce(
-        lambda x, y: x + y)
+    result = lr_model.transform(predict_data)
+    print(result.prediction)
+    lrTotalCorrect = result.rdd.map(lambda r: 1 if (r.prediction == r.label) else 0).reduce(lambda x, y: x + y)
+
     lrAccuracy = lrTotalCorrect / float(predict_data.count())  # 0.5136044023234485
-    # 清除默认阈值，这样会输出原始的预测评分，即带有确信度的结果
-    lr_model.clearThreshold()
-    lrPredictionAndLabels = predict_data.map(lambda lp: (float(lr_model.predict(lp.features)), lp.label))
+    # # 清除默认阈值，这样会输出原始的预测评分，即带有确信度的结果
+    lrPredictionAndLabels = result.rdd.map(lambda lp: (float(lp.prediction), float(lp.label)))
     lrmetrics = BinaryClassificationMetrics(lrPredictionAndLabels)
 
     print("Area under PR = %s" % lrmetrics.areaUnderPR)

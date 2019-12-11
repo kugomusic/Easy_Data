@@ -132,7 +132,11 @@ def get_model_by_project_id(project_id):
     # 返回结果
     config = dict()
     for operator in operators:
-        config[operator.id] = {'type': operator_types_dict[operator.operator_type_id].type_name,
+        if operator_types_dict[operator.operator_type_id].id == 5001:
+            data_operator_type = json.loads(operator.operator_config)['fileUrl'][0][operator.id].split('/')[-1]
+        else:
+            data_operator_type = operator_types_dict[operator.operator_type_id].type_name
+        config[operator.id] = {'type': data_operator_type,
                                'name': operator_types_dict[operator.operator_type_id].id,
                                'location': json.loads(operator.operator_style)['location'],
                                'config': json.loads(operator.operator_config),
